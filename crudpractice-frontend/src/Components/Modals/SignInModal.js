@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap'
-import SignUpForm from '../Forms/SignUpForm'
+import SignInForm from '../Forms/SignInForm'
 
-class SignUpModalForm extends Component {
+class SignInModalForm extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -29,7 +29,7 @@ class SignUpModalForm extends Component {
                 onClick={this.toggle}
                 style={{float: "left", marginRight:"10px"}}>{label}
               </Button>
-      title = 'Sign Up'
+      title = 'Sign In'
 
       return (
       <div>
@@ -37,7 +37,7 @@ class SignUpModalForm extends Component {
         <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
           <ModalHeader toggle={this.toggle} close={closeBtn}>{title}</ModalHeader>
           <ModalBody>
-            <SignUpForm
+            <SignInForm
               updateCurrentUser={this.props.updateCurrentUser}
               toggle={this.toggle}
               item={this.props.item} />
@@ -48,4 +48,4 @@ class SignUpModalForm extends Component {
   }
 }
 
-export default SignUpModalForm
+export default SignInModalForm

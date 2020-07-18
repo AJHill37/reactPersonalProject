@@ -144,18 +144,41 @@ const getTableData = (req, res, db) => {
   // app/models/user.js
   const authenticate = (username, token, db) => {
     db.select('*').from('users').where('token', '=', token)
-    .then((data) => {
-      if(data.length) {
-        return data[0].username === username
-      } else { 
-        return false
-      }
+    .then(data => {
+      console.log(data.length ? data[0].username === username : false)
+      data.length ? data[0].username === username : false
     })
   }
   //END USER AUTH SECTION
 
- const getUserTableData = (req, res, db) => {
-    if(authenticate(req.params.username, req.params.token, db)){
+//This is currently a mess and desperately needs to be cleaned up but I need to move on.
+const getUserTableData = (req, res, db) => {
+
+    let token = req.params.token
+    let username = req.params.username
+    //authenticate(req.params.username, req.params.token, db)
+    db.select('*').from('users').where('token', '=', token)
+    .then(data => {
+      if(data.length ? data[0].username === username : false){
+        testFunc(req,res,db)
+      } else {
+        res.json({dbError: 'Failed to authenticate'})
+      }
+    })
+
+    /*
+    .then(isAuth => {
+      console.log(isAuth)
+      if(isAuth){
+        testFunc(req,res,db)
+      } else {
+        res.json({dbError: 'Failed to authenticate'})
+      }
+    })*/
+        
+    /*
+    let auth = authenticate(req.params.username, req.params.token, db)
+    if (auth) {
       db.select('*').from('timeentry').where('username', '=', req.params.username)
       .then(items => {
         if(items.length){
@@ -165,9 +188,22 @@ const getTableData = (req, res, db) => {
         }
       })
       .catch(err => res.status(400).json({dbError: 'db error'}))
-    }
+    } else {
+      res.json({dbError: 'Failed to authenticate'})
+    }*/
   }
 
+  const testFunc = (req, res, db) => {
+    db.select('*').from('timeentry').where('username', '=', req.params.username)
+    .then(items => {
+      if(items.length){
+        res.json(items)
+      } else {
+        res.json({dataExists: 'false'})
+      }
+    })
+    .catch(err => res.status(400).json({dbError: 'db error'}))  
+  }
 
   module.exports = {
     signup,
