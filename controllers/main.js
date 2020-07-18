@@ -81,7 +81,7 @@ const getTableData = (req, res, db) => {
   // user will be saved to db - we're explicitly asking postgres to return back helpful info from the row created
   const createUser = (user, db) => {
     return db.raw(
-      "INSERT INTO users (username, password_digest, token, created_at, isAdmin, isManager, preferredWorkingHourPerDay) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id, username, created_at, token",
+      "INSERT INTO users (username, password_digest, token, created_at, isAdmin, isManager, preferredWorkingHourPerDay) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING username, created_at, token",
       [user.username, user.password_digest, user.token, new Date(), user.isAdmin, user.isManager, user.preferredWorkingHourPerDay]
     )
     .then((data) => data.rows[0])
@@ -142,28 +142,38 @@ const getTableData = (req, res, db) => {
   }
 
   // app/models/user.js
-  const authenticate = (userReq) => {
-    findByToken(userReq.token)
-      .then((user) => {
-        if (user.username == userReq.username) {
-          return true
+  const authenticate = (username, token, db) => {
+    db.select('*').from('users').where('token', '=', token)
+    .then((data) => {
+      if(data.length) {
+        return data[0].username === username
+      } else { 
+        return false
+      }
+    })
+  }
+  //END USER AUTH SECTION
+
+ const getUserTableData = (req, res, db) => {
+    if(authenticate(req.params.username, req.params.token, db)){
+      db.select('*').from('timeentry').where('username', '=', req.params.username)
+      .then(items => {
+        if(items.length){
+          res.json(items)
         } else {
-          return false
+          res.json({dataExists: 'false'})
         }
       })
+      .catch(err => res.status(400).json({dbError: 'db error'}))
+    }
   }
 
-  const findByToken = (token) => {
-    return database.raw("SELECT * FROM users WHERE token = ?", [token])
-      .then((data) => data.rows[0])
-  }
-
-  //END USER AUTH SECTION
 
   module.exports = {
     signup,
     signin,
     getTableData,
+    getUserTableData,
     postTableData,
     putTableData,
     deleteTableData

@@ -26,27 +26,29 @@ class DataTable extends Component {
   }
 
   render() {
-
-    const items = this.props.items.map(item => {
-      return (
-        <tr key={item.id}>
-          <th scope="row">{item.id}</th>
-          <td>{item.first}</td>
-          <td>{item.last}</td>
-          <td>{item.email}</td>
-          <td>{item.phone}</td>
-          <td>{item.location}</td>
-          <td>{item.hobby}</td>
-          <td>
-            <div style={{width:"110px"}}>
-              <ModalForm buttonLabel="Edit" item={item} updateState={this.props.updateState}/>
-              {' '}
-              <Button color="danger" onClick={() => this.deleteItem(item.id)}>Del</Button>
-            </div>
-          </td>
-        </tr>
-        )
-      })
+    let items = <></>
+    if(this.props.items.length > 0){
+      items = this.props.items.map(item => {
+        return (
+          <tr key={item.id}>
+            <th scope="row">{item.id}</th>
+            <td>{item.first}</td>
+            <td>{item.last}</td>
+            <td>{item.email}</td>
+            <td>{item.phone}</td>
+            <td>{item.location}</td>
+            <td>{item.hobby}</td>
+            <td>
+              <div style={{width:"110px"}}>
+                <ModalForm buttonLabel="Edit" item={item} updateState={this.props.updateState}/>
+                {' '}
+                <Button color="danger" onClick={() => this.deleteItem(item.id)}>Del</Button>
+              </div>
+            </td>
+          </tr>
+          )
+        })      
+    }
 
     return (
       <Table responsive hover>

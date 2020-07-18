@@ -3,7 +3,6 @@ import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
 class SignUpForm extends React.Component {
   state = {
-    id: 0,
     username: '',
     password: '',
     preferredWorkingHourPerDay: 0,
@@ -37,8 +36,8 @@ class SignUpForm extends React.Component {
   componentDidMount(){
     // if item exists, populate the state with proper data
     if(this.props.currentUser){
-      const { id, username, created_at, token} = this.props.currentUser
-      this.setState({ id, username, created_at, token })
+      const { username, created_at, token} = this.props.currentUser
+      this.setState({ username, created_at, token })
     }
   }
 

@@ -49,20 +49,46 @@ class App extends Component {
     this.getItems()
   }
 
-
-  render() {
-    const isUser = this.state.currentUser
-    let testText
-    if(isUser){
-      testText = <h1 style={{margin: "20px 0"}}>ABC</h1>
+  /*
+   * This method exists because CSVLink doesn't like empty arrays as data, so we just pass in an empty string
+   * if there aren't any items.
+   */
+  gCSV(items){
+    const isItems = typeof items != "undefined" && items != null && items.length != null && items.length > 0
+    if(isItems){
+      return (
+        <CSVLink
+          filename={"db.csv"}
+          color="primary"
+          style={{float: "left", marginRight: "10px"}}
+          className="btn btn-primary"
+          data={items}>
+          Download CSV
+        </CSVLink>            
+      )
     } else {
-      testText = <h1 style={{margin: "20px 0"}}>123</h1>
+      return ( 
+        <CSVLink
+          filename={"db.csv"}
+          color="primary"
+          style={{float: "left", marginRight: "10px"}}
+          className="btn btn-primary"
+          data={""}>
+          Download CSV
+        </CSVLink>    
+      )        
     }
+  }
+
+  defaultScreen(){
+    //<SignUpModalForm buttonLabel="Sign Up" updateCurrentUser={this.updateCurrentUser}/>
+    const csvLink = this.gCSV(this.state.items)
+
     return (
       <Container className="App">
         <Row>
           <Col>
-            {testText}
+            <h1 style={{margin: "20px 0"}}>ABC</h1>
           </Col>
         </Row>
         <Row>
@@ -72,20 +98,24 @@ class App extends Component {
         </Row>
         <Row>
           <Col>
-            <CSVLink
-              filename={"db.csv"}
-              color="primary"
-              style={{float: "left", marginRight: "10px"}}
-              className="btn btn-primary"
-              data={this.state.items}>
-              Download CSV
-            </CSVLink>
+            {csvLink}
             <ModalForm buttonLabel="Add Item" addItemToState={this.addItemToState}/>
             <SignUpModalForm buttonLabel="Sign Up" updateCurrentUser={this.updateCurrentUser}/>
           </Col>
         </Row>
       </Container>
     )
+  }
+
+  render() {
+    const isUser = this.state.currentUser
+    let testText
+    if(isUser){
+      testText = <h1 style={{margin: "20px 0"}}>ABC</h1>
+    } else {
+      testText = <h1 style={{margin: "20px 0"}}>123</h1>
+    }
+    return ( this.defaultScreen() )
   }
 }
 

@@ -60,6 +60,8 @@ app.delete('/crud', (req, res) => main.deleteTableData(req, res, db))
 
 app.post('/signup', (req, res) => main.signup(req, res, db))
 app.post('/signin', (req, res) => main.signin(req, res, db))
+app.get('/:username/:token', (req, res) => main.getUserTableData(req, res, db))
+
 
 // App Server Connection
 app.listen(process.env.PORT || 3000, () => {
