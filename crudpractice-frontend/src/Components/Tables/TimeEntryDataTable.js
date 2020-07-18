@@ -26,15 +26,23 @@ class TimeEntryDataTable extends Component {
   }*/
 
   render() {
-    let items = <></>
-    if(this.props.items.length > 0){
-      items = this.props.items.map(item => {
+    let timeEntries = <></>
+    if(this.props.timeEntries.length > 0){
+      timeEntries = this.props.timeEntries.map(timeEntry => {
         return (
-          <tr key={item.entry_id}>
-            <th scope="row">{item.entry_id}</th>
-            <td>{item.username}</td>
-            <td>{item.workedOn}</td>
-            <td>{item.date}</td>
+          <tr key={timeEntry.entry_id}>
+            <th scope="row">{timeEntry.entry_id}</th>
+            <td>{timeEntry.username}</td>
+            <td>{timeEntry.hours}</td>
+            <td>{timeEntry.workedon}</td>
+            <td>{timeEntry.date}</td>
+            <td>
+              <div style={{width:"110px"}}>
+                <ModalForm buttonLabel="Edit" timeEntry={timeEntry} updateState={this.props.updateState}/>
+                {' '}
+                <Button color="danger" onClick={() => this.deleteItem(timeEntry.entry_id)}>Del</Button>
+              </div>
+            </td>
           </tr>
           )
         })      
@@ -49,10 +57,11 @@ class TimeEntryDataTable extends Component {
             <th>Hours</th>
             <th>What was worked on</th>
             <th>Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {items}
+          {timeEntries}
         </tbody>
       </Table>
     )

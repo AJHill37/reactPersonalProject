@@ -1,6 +1,7 @@
 const environment     = process.env.NODE_ENV || 'development';    // set environment
 const bcrypt          = require('bcrypt')                         // bcrypt will encrypt passwords to be saved in db
-const crypto          = require('crypto')                         // built-in encryption node module
+const crypto          = require('crypto');                         // built-in encryption node module
+const { token } = require('morgan');
 
 
 const getTableData = (req, res, db) => {
@@ -45,6 +46,15 @@ const getTableData = (req, res, db) => {
       .catch(err => res.status(400).json({dbError: 'db error'}))
   }
   
+  const deleteUserTableData = (req, res, db) => {
+    const { entry_id } = req.body
+    db('timeEntry').where({entry_id}).del()
+      .then(() => {
+        res.json({delete: 'true'})
+      })
+      .catch(err => res.status(400).json({dbError: 'db error'}))
+  }
+
   //USER AUTH SECTION
 
   // app/models/user.js
@@ -107,7 +117,10 @@ const getTableData = (req, res, db) => {
         return checkPassword(userReq.password, foundUser)
       })
       .then((res) => createToken())
-      .then(token => updateUserToken(token, user, db))
+      .then(token => {
+        updateUserToken(token, user, db)
+        user.token = token
+      })
       .then(() => {
         delete user.password_digest
         res.status(200).json(user)
@@ -137,7 +150,7 @@ const getTableData = (req, res, db) => {
   }
 
   const updateUserToken = (token, user, db) => {
-    return db.raw("UPDATE users SET token = ? WHERE id = ? RETURNING id, username, token", [token, user.id])
+    return db.raw("UPDATE users SET token = ? WHERE username = ? RETURNING username, token", [token, user.username])
       .then((data) => data.rows[0])
   }
 
@@ -160,7 +173,7 @@ const getUserTableData = (req, res, db) => {
     db.select('*').from('users').where('token', '=', token)
     .then(data => {
       if(data.length ? data[0].username === username : false){
-        testFunc(req,res,db)
+        testFunc(req, res, db)
       } else {
         res.json({dbError: 'Failed to authenticate'})
       }
@@ -208,8 +221,8 @@ const getUserTableData = (req, res, db) => {
   module.exports = {
     signup,
     signin,
-    getTableData,
     getUserTableData,
+    getTableData,
     postTableData,
     putTableData,
     deleteTableData

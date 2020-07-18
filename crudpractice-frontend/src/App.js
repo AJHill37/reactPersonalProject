@@ -4,18 +4,19 @@ import SignInModalForm from './Components/Modals/SignInModal'
 import SignUpModalForm from './Components/Modals/SignUpModal'
 import ModalForm from './Components/Modals/Modal'
 import DataTable from './Components/Tables/DataTable'
-import TimeEntryDataTable from './Components/Tables/DataTable'
+import TimeEntryDataTable from './Components/Tables/TimeEntryDataTable'
 import { CSVLink } from "react-csv"
 
 class App extends Component {
   state = {
-    items: []
+    items: [],
+    timeEntries: []
   }
 
   getUserTimeEntries(user){
     fetch('http://localhost:3000/' + user.username + '/' + user.token)
       .then(response => response.json())
-      .then(items => this.setState({items}))
+      .then(timeEntries => this.setState({timeEntries}))
       .catch(err => console.log(err))
   }
 
@@ -33,8 +34,8 @@ class App extends Component {
   }
 
   updateCurrentUser = (user) => {
-    this.setState({currentUser: user})
     this.getUserTimeEntries(user)
+    this.setState({currentUser: user})
   }
 
   updateState = (item) => {
@@ -57,6 +58,7 @@ class App extends Component {
 
   componentDidMount(){
     this.getItems()
+    console.log("It mounted")
   }
 
   /*
@@ -130,7 +132,7 @@ class App extends Component {
         </Row>
         <Row>
           <Col>
-            <TimeEntryDataTable items={this.state.items} updateState={this.updateState} deleteItemFromState={this.deleteItemFromState} />
+            <TimeEntryDataTable timeEntries={this.state.timeEntries} updateState={this.updateState} deleteItemFromState={this.deleteItemFromState} />
           </Col>
         </Row>
         <Row>
@@ -149,7 +151,15 @@ class App extends Component {
 
   render() {
     const isUser = this.state.currentUser
-    if(isUser){
+    const timeEntriesPopulated = this.state.timeEntries.length > 0
+    console.log(isUser)
+    console.log('Line 1')
+    console.log(timeEntriesPopulated)
+    console.log('Line 2')
+    console.log(this.state.timeEntries)
+    console.log('Line 3')
+    console.log(isUser && timeEntriesPopulated)
+    if (isUser && timeEntriesPopulated) {
       return ( this.userScreen() )
     } else {
       return ( this.defaultScreen() )

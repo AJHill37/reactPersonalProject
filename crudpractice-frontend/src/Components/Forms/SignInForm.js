@@ -33,10 +33,10 @@ class SignInForm extends React.Component {
 
   componentDidMount(){
     // if item exists, populate the state with proper data
-    if(this.props.currentUser){
+    /*if(this.props.currentUser){
       const { username, created_at, token} = this.props.currentUser
       this.setState({ username, created_at, token })
-    }
+    }*/
   }
 
   render() {
