@@ -62,6 +62,8 @@ app.post('/signup', (req, res) => main.signup(req, res, db))
 app.post('/signin', (req, res) => main.signin(req, res, db))
 app.get('/getTimeEntries/:username/:token', (req, res) => main.getTimeEntries(req, res, db))
 app.delete('/deleteTimeEntry/:username/:token', (req, res) => main.deleteTimeEntry(req, res, db))
+app.post('/postTimeEntry/:username/:token', (req, res) => main.postTimeEntry(req, res, db))
+app.put('/putTimeEntry/:username/:token', (req, res) => main.putTimeEntry(req, res, db))
 
 
 // App Server Connection

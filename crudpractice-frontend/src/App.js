@@ -3,6 +3,7 @@ import { Container, Row, Col } from 'reactstrap'
 import SignInModalForm from './Components/Modals/SignInModal'
 import SignUpModalForm from './Components/Modals/SignUpModal'
 import ModalForm from './Components/Modals/Modal'
+import AddEditTimeEntryModalForm from './Components/Modals/AddEditTimeEntryModalForm'
 import DataTable from './Components/Tables/DataTable'
 import TimeEntryDataTable from './Components/Tables/TimeEntryDataTable'
 import { CSVLink } from "react-csv"
@@ -33,6 +34,12 @@ class App extends Component {
     }))
   }
 
+  addTimeEntryToState = (timeEntry) => {
+    this.setState(prevState => ({
+      timeEntries: [...prevState.timeEntries, timeEntry]
+    }))
+  }
+
   updateCurrentUser = (user) => {
     this.getUserTimeEntries(user)
     this.setState({currentUser: user})
@@ -50,6 +57,22 @@ class App extends Component {
     ]
     this.setState({ items: newArray })
   }
+
+  updateTimeEntryState = (timeEntry) => {
+    console.log(this.state.timeEntries)
+    console.log(timeEntry)
+    const timeEntryIndex = this.state.timeEntries.findIndex(data => data.entry_id === timeEntry.entry_id)
+    const newArray = [
+    // destructure all items from beginning to the indexed item
+      ...this.state.timeEntries.slice(0, timeEntryIndex),
+    // add the updated item to the array
+      timeEntry,
+    // add the rest of the items to the array from the index after the replaced item
+      ...this.state.timeEntries.slice(timeEntryIndex + 1)
+    ]
+    this.setState({ timeEntries: newArray })
+  }
+
 
   deleteItemFromState = (id) => {
     const updatedItems = this.state.items.filter(item => item.id !== id)
@@ -137,12 +160,13 @@ class App extends Component {
         </Row>
         <Row>
           <Col>
-            <TimeEntryDataTable timeEntries={this.state.timeEntries} updateState={this.updateState} deleteTimeEntryFromState={this.deleteTimeEntryFromState} currentUser={this.state.currentUser} />
+            <TimeEntryDataTable timeEntries={this.state.timeEntries} updateTimeEntryState={this.updateTimeEntryState} deleteTimeEntryFromState={this.deleteTimeEntryFromState} currentUser={this.state.currentUser} />
           </Col>
         </Row>
         <Row>
           <Col>
             {csvLink}
+            <AddEditTimeEntryModalForm buttonLabel="Add Time Entry" addTimeEntryToState={this.addTimeEntryToState} currentUser={this.state.currentUser}/>
           </Col>
         </Row>
       </Container>
@@ -157,13 +181,6 @@ class App extends Component {
   render() {
     const isUser = this.state.currentUser
     const timeEntriesPopulated = this.state.timeEntries.length > 0
-    console.log(isUser)
-    console.log('Line 1')
-    console.log(timeEntriesPopulated)
-    console.log('Line 2')
-    console.log(this.state.timeEntries)
-    console.log('Line 3')
-    console.log(isUser)
     if (isUser && timeEntriesPopulated) {
       return ( this.userScreen() )
     } else {

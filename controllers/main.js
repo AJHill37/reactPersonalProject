@@ -39,7 +39,6 @@ const getTableData = (req, res, db) => {
   
   const deleteTableData = (req, res, db) => {
     const { id } = req.body
-    console.log({ id })
     db('testtable1').where({id}).del()
       .then(() => {
         res.json({delete: 'true'})
@@ -179,18 +178,44 @@ const getTableData = (req, res, db) => {
   }
 
   const deleteTimeEntry = (req, res, db) => {
-    console.log("DELETE CALLED")
     authenticate(req, res, db, deleteTimeEntryHelper)
   }
 
   const deleteTimeEntryHelper = (req, res, db) => {
     const { entry_id } = req.body
-    console.log({ entry_id })
-    console.log(req.body)
-    db('timeEntry').where({'entry_id': entry_id}).del()
+    db('timeentry').where({entry_id}).del()
       .then(() => {
-        console.log("DELETE TRUE")
         res.json({delete: 'true'})
+      })
+      .catch(err => res.status(400).json({dbError: 'db error'}))
+  }
+
+  const postTimeEntry = (req, res, db) => {
+    authenticate(req, res, db, postTimeEntryHelper)
+  }
+
+  const postTimeEntryHelper = (req, res, db) => {
+    const { username, hours, workedon } = req.body
+    const date = new Date()
+    db('timeentry').insert({ username, hours, workedon, date })
+      .returning('*')
+      .then(timeEntry => {
+        res.json(timeEntry)
+      })
+      .catch(err => res.status(400).json({dbError: 'db error'}))
+  }
+
+  const putTimeEntry = (req, res, db) => {
+    authenticate(req, res, db, putTimeEntryHelper)
+  }
+
+
+  const putTimeEntryHelper = (req, res, db) => {
+    const { entry_id, hours, workedon } = req.body
+    db('timeentry').where({entry_id}).update({hours, workedon})
+      .returning('*')
+      .then(item => {
+        res.json(item)
       })
       .catch(err => res.status(400).json({dbError: 'db error'}))
   }
@@ -201,6 +226,8 @@ const getTableData = (req, res, db) => {
     signin,
     getTimeEntries,
     deleteTimeEntry,
+    postTimeEntry,
+    putTimeEntry,
     getTableData,
     postTableData,
     putTableData,

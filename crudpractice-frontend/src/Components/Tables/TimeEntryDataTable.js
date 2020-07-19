@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Table, Button } from 'reactstrap';
-import ModalForm from '../Modals/Modal'
+import AddEditTimeEntryModalForm from '../Modals/AddEditTimeEntryModalForm'
 
 class TimeEntryDataTable extends Component {
   
@@ -38,7 +38,7 @@ class TimeEntryDataTable extends Component {
             <td>{timeEntry.date}</td>
             <td>
               <div style={{width:"110px"}}>
-                <ModalForm buttonLabel="Edit" timeEntry={timeEntry} updateState={this.props.updateState}/>
+                <AddEditTimeEntryModalForm buttonLabel="Edit" timeEntry={timeEntry} updateTimeEntryState={this.props.updateTimeEntryState} currentUser={this.props.currentUser}/>
                 {' '}
                 <Button color="danger" onClick={() => this.deleteItem(timeEntry.entry_id, this.props.currentUser)}>Del</Button>
               </div>
