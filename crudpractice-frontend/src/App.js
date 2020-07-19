@@ -67,7 +67,7 @@ class App extends Component {
       ...this.state.timeEntries.slice(0, timeEntryIndex),
     // add the updated item to the array
       timeEntry,
-    // add the rest of the items to the array from the index after the replaced item
+    // add the rest of the items to the array from the index after the replaced item 
       ...this.state.timeEntries.slice(timeEntryIndex + 1)
     ]
     this.setState({ timeEntries: newArray })
