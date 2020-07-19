@@ -39,6 +39,7 @@ const getTableData = (req, res, db) => {
   
   const deleteTableData = (req, res, db) => {
     const { id } = req.body
+    console.log({ id })
     db('testtable1').where({id}).del()
       .then(() => {
         res.json({delete: 'true'})
@@ -46,15 +47,6 @@ const getTableData = (req, res, db) => {
       .catch(err => res.status(400).json({dbError: 'db error'}))
   }
   
-  const deleteUserTableData = (req, res, db) => {
-    const { entry_id } = req.body
-    db('timeEntry').where({entry_id}).del()
-      .then(() => {
-        res.json({delete: 'true'})
-      })
-      .catch(err => res.status(400).json({dbError: 'db error'}))
-  }
-
   //USER AUTH SECTION
 
   // app/models/user.js
@@ -154,59 +146,27 @@ const getTableData = (req, res, db) => {
       .then((data) => data.rows[0])
   }
 
-  // app/models/user.js
-  const authenticate = (username, token, db) => {
-    db.select('*').from('users').where('token', '=', token)
-    .then(data => {
-      console.log(data.length ? data[0].username === username : false)
-      data.length ? data[0].username === username : false
-    })
-  }
   //END USER AUTH SECTION
 
-//This is currently a mess and desperately needs to be cleaned up but I need to move on.
-const getUserTableData = (req, res, db) => {
 
+  const authenticate = (req, res, db, func) => {
     let token = req.params.token
     let username = req.params.username
-    //authenticate(req.params.username, req.params.token, db)
     db.select('*').from('users').where('token', '=', token)
     .then(data => {
       if(data.length ? data[0].username === username : false){
-        testFunc(req, res, db)
+        func(req, res, db)
       } else {
         res.json({dbError: 'Failed to authenticate'})
       }
     })
-
-    /*
-    .then(isAuth => {
-      console.log(isAuth)
-      if(isAuth){
-        testFunc(req,res,db)
-      } else {
-        res.json({dbError: 'Failed to authenticate'})
-      }
-    })*/
-        
-    /*
-    let auth = authenticate(req.params.username, req.params.token, db)
-    if (auth) {
-      db.select('*').from('timeentry').where('username', '=', req.params.username)
-      .then(items => {
-        if(items.length){
-          res.json(items)
-        } else {
-          res.json({dataExists: 'false'})
-        }
-      })
-      .catch(err => res.status(400).json({dbError: 'db error'}))
-    } else {
-      res.json({dbError: 'Failed to authenticate'})
-    }*/
   }
 
-  const testFunc = (req, res, db) => {
+  const getTimeEntries = (req, res, db) => {
+      authenticate(req, res, db, getTimeEntriesHelper)
+  }
+
+  const getTimeEntriesHelper = (req, res, db) => {
     db.select('*').from('timeentry').where('username', '=', req.params.username)
     .then(items => {
       if(items.length){
@@ -218,10 +178,29 @@ const getUserTableData = (req, res, db) => {
     .catch(err => res.status(400).json({dbError: 'db error'}))  
   }
 
+  const deleteTimeEntry = (req, res, db) => {
+    console.log("DELETE CALLED")
+    authenticate(req, res, db, deleteTimeEntryHelper)
+  }
+
+  const deleteTimeEntryHelper = (req, res, db) => {
+    const { entry_id } = req.body
+    console.log({ entry_id })
+    console.log(req.body)
+    db('timeEntry').where({'entry_id': entry_id}).del()
+      .then(() => {
+        console.log("DELETE TRUE")
+        res.json({delete: 'true'})
+      })
+      .catch(err => res.status(400).json({dbError: 'db error'}))
+  }
+
+
   module.exports = {
     signup,
     signin,
-    getUserTableData,
+    getTimeEntries,
+    deleteTimeEntry,
     getTableData,
     postTableData,
     putTableData,

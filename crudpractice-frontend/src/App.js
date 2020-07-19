@@ -14,7 +14,7 @@ class App extends Component {
   }
 
   getUserTimeEntries(user){
-    fetch('http://localhost:3000/' + user.username + '/' + user.token)
+    fetch('http://localhost:3000/getTimeEntries/' + user.username + '/' + user.token)
       .then(response => response.json())
       .then(timeEntries => this.setState({timeEntries}))
       .catch(err => console.log(err))
@@ -54,6 +54,11 @@ class App extends Component {
   deleteItemFromState = (id) => {
     const updatedItems = this.state.items.filter(item => item.id !== id)
     this.setState({ items: updatedItems })
+  }
+
+  deleteTimeEntryFromState = (entry_id) => {
+    const updatedItems = this.state.timeEntries.filter(timeEntry => timeEntry.entry_id !== entry_id)
+    this.setState({ timeEntries: updatedItems })
   }
 
   componentDidMount(){
@@ -132,7 +137,7 @@ class App extends Component {
         </Row>
         <Row>
           <Col>
-            <TimeEntryDataTable timeEntries={this.state.timeEntries} updateState={this.updateState} deleteItemFromState={this.deleteItemFromState} />
+            <TimeEntryDataTable timeEntries={this.state.timeEntries} updateState={this.updateState} deleteTimeEntryFromState={this.deleteTimeEntryFromState} currentUser={this.state.currentUser} />
           </Col>
         </Row>
         <Row>
@@ -158,7 +163,7 @@ class App extends Component {
     console.log('Line 2')
     console.log(this.state.timeEntries)
     console.log('Line 3')
-    console.log(isUser && timeEntriesPopulated)
+    console.log(isUser)
     if (isUser && timeEntriesPopulated) {
       return ( this.userScreen() )
     } else {

@@ -60,7 +60,8 @@ app.delete('/crud', (req, res) => main.deleteTableData(req, res, db))
 
 app.post('/signup', (req, res) => main.signup(req, res, db))
 app.post('/signin', (req, res) => main.signin(req, res, db))
-app.get('/:username/:token', (req, res) => main.getUserTableData(req, res, db))
+app.get('/getTimeEntries/:username/:token', (req, res) => main.getTimeEntries(req, res, db))
+app.delete('/deleteTimeEntry/:username/:token', (req, res) => main.deleteTimeEntry(req, res, db))
 
 
 // App Server Connection

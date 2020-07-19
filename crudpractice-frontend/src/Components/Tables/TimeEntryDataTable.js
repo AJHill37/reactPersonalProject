@@ -4,26 +4,26 @@ import ModalForm from '../Modals/Modal'
 
 class TimeEntryDataTable extends Component {
   
-  /*
-  deleteItem = id => {
+  
+  deleteItem(entry_id, user) {
     let confirmDelete = window.confirm('Delete item forever?')
     if(confirmDelete){
-      fetch('http://localhost:3000/crud', {
+      fetch('http://localhost:3000/deleteTimeEntry/' + user.username + '/' + user.token, {
       method: 'delete',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        id
+        entry_id
       })
     })
       .then(response => response.json())
-      .then(item => {
-        this.props.deleteItemFromState(id)
+      .then(timeEntry => {
+        this.props.deleteTimeEntryFromState(entry_id)
       })
       .catch(err => console.log(err))
     }
-  }*/
+  }
 
   render() {
     let timeEntries = <></>
@@ -40,7 +40,7 @@ class TimeEntryDataTable extends Component {
               <div style={{width:"110px"}}>
                 <ModalForm buttonLabel="Edit" timeEntry={timeEntry} updateState={this.props.updateState}/>
                 {' '}
-                <Button color="danger" onClick={() => this.deleteItem(timeEntry.entry_id)}>Del</Button>
+                <Button color="danger" onClick={() => this.deleteItem(timeEntry.entry_id, this.props.currentUser)}>Del</Button>
               </div>
             </td>
           </tr>
