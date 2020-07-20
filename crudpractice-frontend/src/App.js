@@ -2,65 +2,58 @@ import React, { Component } from 'react'
 import { Container, Row, Col } from 'reactstrap'
 import SignInModalForm from './Components/Modals/SignInModal'
 import SignUpModalForm from './Components/Modals/SignUpModal'
-import ModalForm from './Components/Modals/Modal'
+import AddEditUserModalForm from './Components/Modals/AddEditUserModalForm'
 import AddEditTimeEntryModalForm from './Components/Modals/AddEditTimeEntryModalForm'
-import DataTable from './Components/Tables/DataTable'
 import TimeEntryDataTable from './Components/Tables/TimeEntryDataTable'
+import UsersDataTable from './Components/Tables/UsersDataTable'
 import { CSVLink } from "react-csv"
 
 class App extends Component {
   state = {
-    items: [],
-    timeEntries: []
+    timeEntries: [],
+    users: []
   }
 
-  getUserTimeEntries(user){
-    fetch('http://localhost:3000/getTimeEntries/' + user.username + '/' + user.token)
+  getAllUsers(user){
+    fetch('http://localhost:3000/getAllUsers/' + this.state.currentUser.username + '/' + this.state.currentUser.token)
+      .then(response => response.json())
+      .then(users => {
+        console.log(users)
+        this.setState({users})
+      })
+      .catch(err => console.log(err))
+  }
+
+
+  getUserTimeEntries(){
+    fetch('http://localhost:3000/getTimeEntries/' + this.state.currentUser.username + '/' + this.state.currentUser.token)
       .then(response => response.json())
       .then(timeEntries => this.setState({timeEntries}))
       .catch(err => console.log(err))
   }
 
-  getItems(){
-    fetch('http://localhost:3000/crud')
-      .then(response => response.json())
-      .then(items => this.setState({items}))
-      .catch(err => console.log(err))
-  }
-
-  addItemToState = (item) => {
+  addUserToState = (user) => {
+    console.log('Got to add user')
     this.setState(prevState => ({
-      items: [...prevState.items, item]
+      users: prevState.users.length ? [...prevState.users, user] : [user]
     }))
   }
 
   addTimeEntryToState = (timeEntry) => {
     this.setState(prevState => ({
-      timeEntries: [...prevState.timeEntries, timeEntry]
+      timeEntries: prevState.timeEntries.length ? [...prevState.timeEntries, timeEntry] : [timeEntry]
     }))
   }
 
   updateCurrentUser = (user) => {
-    this.getUserTimeEntries(user)
-    this.setState({currentUser: user})
-  }
-
-  updateState = (item) => {
-    const itemIndex = this.state.items.findIndex(data => data.id === item.id)
-    const newArray = [
-    // destructure all items from beginning to the indexed item
-      ...this.state.items.slice(0, itemIndex),
-    // add the updated item to the array
-      item,
-    // add the rest of the items to the array from the index after the replaced item
-      ...this.state.items.slice(itemIndex + 1)
-    ]
-    this.setState({ items: newArray })
+    console.log(user)
+    this.setState({currentUser: user}, () => {
+      this.getUserTimeEntries()
+      this.getAllUsers()
+    })
   }
 
   updateTimeEntryState = (timeEntry) => {
-    console.log(this.state.timeEntries)
-    console.log(timeEntry)
     const timeEntryIndex = this.state.timeEntries.findIndex(data => data.entry_id === timeEntry.entry_id)
     const newArray = [
     // destructure all items from beginning to the indexed item
@@ -73,20 +66,31 @@ class App extends Component {
     this.setState({ timeEntries: newArray })
   }
 
-
-  deleteItemFromState = (id) => {
-    const updatedItems = this.state.items.filter(item => item.id !== id)
-    this.setState({ items: updatedItems })
+  updateUserState = (user) => {
+    const userIndex = this.state.users.findIndex(data => data.username === user.username)
+    const newArray = [
+    // destructure all items from beginning to the indexed item
+      ...this.state.users.slice(0, userIndex),
+    // add the updated item to the array
+      user,
+    // add the rest of the items to the array from the index after the replaced item 
+      ...this.state.users.slice(userIndex + 1)
+    ]
+    this.setState({ users: newArray })
   }
 
+
   deleteTimeEntryFromState = (entry_id) => {
-    const updatedItems = this.state.timeEntries.filter(timeEntry => timeEntry.entry_id !== entry_id)
-    this.setState({ timeEntries: updatedItems })
+    const updatedTimeEntries = this.state.timeEntries.filter(timeEntry => timeEntry.entry_id !== entry_id)
+    this.setState({ timeEntries: updatedTimeEntries })
+  }
+
+  deleteUserFromState = (username) => {
+    const updatedUsers = this.state.users.filter(user => user.username !== username)
+    this.setState({ users: updatedUsers })
   }
 
   componentDidMount(){
-    this.getItems()
-    console.log("It mounted")
   }
 
   /*
@@ -121,9 +125,6 @@ class App extends Component {
   }
 
   defaultScreen(){
-    //<SignUpModalForm buttonLabel="Sign Up" updateCurrentUser={this.updateCurrentUser}/>
-    const csvLink = this.gCSV(this.state.items)
-
     return (
       <Container className="App">
         <Row>
@@ -133,13 +134,10 @@ class App extends Component {
         </Row>
         <Row>
           <Col>
-            <DataTable items={this.state.items} updateState={this.updateState} deleteItemFromState={this.deleteItemFromState} />
           </Col>
         </Row>
         <Row>
           <Col>
-            {csvLink}
-            <ModalForm buttonLabel="Add Item" addItemToState={this.addItemToState}/>
             <SignUpModalForm buttonLabel="Sign Up" updateCurrentUser={this.updateCurrentUser}/>
             <SignInModalForm buttonLabel="Sign In" updateCurrentUser={this.updateCurrentUser}/>
           </Col>
@@ -160,7 +158,7 @@ class App extends Component {
         </Row>
         <Row>
           <Col>
-            <TimeEntryDataTable timeEntries={this.state.timeEntries} updateTimeEntryState={this.updateTimeEntryState} deleteTimeEntryFromState={this.deleteTimeEntryFromState} currentUser={this.state.currentUser} />
+            <TimeEntryDataTable getUserTimeEntries={this.getUserTimeEntries} timeEntries={this.state.timeEntries} updateTimeEntryState={this.updateTimeEntryState} deleteTimeEntryFromState={this.deleteTimeEntryFromState} currentUser={this.state.currentUser} />
           </Col>
         </Row>
         <Row>
@@ -169,19 +167,23 @@ class App extends Component {
             <AddEditTimeEntryModalForm buttonLabel="Add Time Entry" addTimeEntryToState={this.addTimeEntryToState} currentUser={this.state.currentUser}/>
           </Col>
         </Row>
+        <Row>
+          <Col>
+            <UsersDataTable users={this.state.users} updateUserState={this.updateUserState} deleteUserFromState={this.deleteUserFromState} currentUser={this.state.currentUser} />
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <AddEditUserModalForm buttonLabel="Add User" addUserToState={this.addUserToState} currentUser={this.state.currentUser}/>
+          </Col>
+        </Row>
       </Container>
     )
-
-    /*
-    <ModalForm buttonLabel="Add Item" addItemToState={this.addItemToState}/>
-    <SignUpModalForm buttonLabel="Sign Up" updateCurrentUser={this.updateCurrentUser}/>
-    */
   }
 
   render() {
     const isUser = this.state.currentUser
-    const timeEntriesPopulated = this.state.timeEntries.length > 0
-    if (isUser && timeEntriesPopulated) {
+    if (isUser) {
       return ( this.userScreen() )
     } else {
       return ( this.defaultScreen() )

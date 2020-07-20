@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
+
 class SignUpForm extends React.Component {
   state = {
     username: '',

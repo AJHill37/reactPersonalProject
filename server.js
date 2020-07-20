@@ -53,10 +53,6 @@ app.use(morgan('combined')) // use 'tiny' or 'combined'
 
 // App Routes - Auth
 app.get('/', (req, res) => res.send('hello world'))
-app.get('/crud', (req, res) => main.getTableData(req, res, db))
-app.post('/crud', (req, res) => main.postTableData(req, res, db))
-app.put('/crud', (req, res) => main.putTableData(req, res, db))
-app.delete('/crud', (req, res) => main.deleteTableData(req, res, db))
 
 app.post('/signup', (req, res) => main.signup(req, res, db))
 app.post('/signin', (req, res) => main.signin(req, res, db))
@@ -65,6 +61,8 @@ app.delete('/deleteTimeEntry/:username/:token', (req, res) => main.deleteTimeEnt
 app.post('/postTimeEntry/:username/:token', (req, res) => main.postTimeEntry(req, res, db))
 app.put('/putTimeEntry/:username/:token', (req, res) => main.putTimeEntry(req, res, db))
 
+app.get('/getAllUsers/:username/:token', (req, res) => main.getAllUsers(req, res, db))
+app.delete('/deleteUser/:username/:token', (req, res) => main.deleteUser(req, res, db))
 
 // App Server Connection
 app.listen(process.env.PORT || 3000, () => {

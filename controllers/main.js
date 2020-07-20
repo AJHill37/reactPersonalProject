@@ -1,51 +1,7 @@
 const environment     = process.env.NODE_ENV || 'development';    // set environment
 const bcrypt          = require('bcrypt')                         // bcrypt will encrypt passwords to be saved in db
 const crypto          = require('crypto');                         // built-in encryption node module
-const { token } = require('morgan');
 
-
-const getTableData = (req, res, db) => {
-    db.select('*').from('testtable1')
-      .then(items => {
-        if(items.length){
-          res.json(items)
-        } else {
-          res.json({dataExists: 'false'})
-        }
-      })
-      .catch(err => res.status(400).json({dbError: 'db error'}))
-  }
-  
-  const postTableData = (req, res, db) => {
-    const { first, last, email, phone, location, hobby } = req.body
-    const added = new Date()
-    db('testtable1').insert({first, last, email, phone, location, hobby, added})
-      .returning('*')
-      .then(item => {
-        res.json(item)
-      })
-      .catch(err => res.status(400).json({dbError: 'db error'}))
-  }
-  
-  const putTableData = (req, res, db) => {
-    const { id, first, last, email, phone, location, hobby } = req.body
-    db('testtable1').where({id}).update({first, last, email, phone, location, hobby})
-      .returning('*')
-      .then(item => {
-        res.json(item)
-      })
-      .catch(err => res.status(400).json({dbError: 'db error'}))
-  }
-  
-  const deleteTableData = (req, res, db) => {
-    const { id } = req.body
-    db('testtable1').where({id}).del()
-      .then(() => {
-        res.json({delete: 'true'})
-      })
-      .catch(err => res.status(400).json({dbError: 'db error'}))
-  }
-  
   //USER AUTH SECTION
 
   // app/models/user.js
@@ -53,7 +9,6 @@ const getTableData = (req, res, db) => {
     const user = req.body
     user.isAdmin = false;
     user.isManager = false;
-    user.preferredWorkingHourPerDay = 8;
     hashPassword(user.password)
       .then((hashedPassword) => {
         delete user.password
@@ -82,8 +37,8 @@ const getTableData = (req, res, db) => {
   // user will be saved to db - we're explicitly asking postgres to return back helpful info from the row created
   const createUser = (user, db) => {
     return db.raw(
-      "INSERT INTO users (username, password_digest, token, created_at, isAdmin, isManager, preferredWorkingHourPerDay) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING username, created_at, token",
-      [user.username, user.password_digest, user.token, new Date(), user.isAdmin, user.isManager, user.preferredWorkingHourPerDay]
+      "INSERT INTO users (username, password_digest, token, created_at, isAdmin, isManager, preferredworkinghourperday) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING username, created_at, token, preferredworkinghourperday",
+      [user.username, user.password_digest, user.token, new Date(), user.isAdmin, user.isManager, user.preferredworkinghourperday]
     )
     .then((data) => data.rows[0])
   }
@@ -92,7 +47,7 @@ const getTableData = (req, res, db) => {
   const createToken = () => {
     return new Promise((resolve, reject) => {
       crypto.randomBytes(16, (err, data) => {
-        err ? reject(err) : resolve(data.toString('base64'))
+        err ? reject(err) : resolve(data.toString('hex'))
       })
     })
   }
@@ -145,27 +100,55 @@ const getTableData = (req, res, db) => {
       .then((data) => data.rows[0])
   }
 
-  //END USER AUTH SECTION
-
-
-  const authenticate = (req, res, db, func) => {
+  const authenticate = (req, res, db, func, needAdmin, needManager) => {
     let token = req.params.token
     let username = req.params.username
     db.select('*').from('users').where('token', '=', token)
     .then(data => {
-      if(data.length ? data[0].username === username : false){
-        func(req, res, db)
+      if(data.length > 0 && 
+        data[0].username === username &&
+        (!needAdmin || data[0].isAdmin) &&
+        (!needManager || data[0].isManager || data[0].isAdmin)){
+        func(req, res, db, data[0].isAdmin, data[0].isManager)
       } else {
         res.json({dbError: 'Failed to authenticate'})
       }
     })
   }
 
-  const getTimeEntries = (req, res, db) => {
-      authenticate(req, res, db, getTimeEntriesHelper)
+  //END USER AUTH SECTION
+
+  //Admin/User Manager section
+  
+  const getAllUsers = (req, res, db) => {
+    authenticate(req, res, db, getAllUsersHelper, false, false)
   }
 
-  const getTimeEntriesHelper = (req, res, db) => {
+  const getAllUsersHelper = (req, res, db, isAdmin, isManager) => {
+    //let query = 'SELECT * FROM users WHERE isAdmin = false AND isManager = false'
+    //if(isAdmin) {
+      query = 'SELECT * FROM users'
+    //}
+    //TODO: Managers and admins see users differently
+    db.select('*').from('users').where('username', '!=', req.params.username)
+    .then(items => {
+      if(items.length){
+        res.json(items)
+      } else {
+        res.json({dataExists: 'false'})
+      }
+    })
+    .catch(err => res.status(400).json({dbError: 'db error'}))  
+  }
+
+
+  //End Admin/User Manager Section
+
+  const getTimeEntries = (req, res, db) => {
+      authenticate(req, res, db, getTimeEntriesHelper, false, false)
+  }
+
+  const getTimeEntriesHelper = (req, res, db, isAdmin, isManager) => {
     db.select('*').from('timeentry').where('username', '=', req.params.username)
     .then(items => {
       if(items.length){
@@ -177,11 +160,26 @@ const getTableData = (req, res, db) => {
     .catch(err => res.status(400).json({dbError: 'db error'}))  
   }
 
-  const deleteTimeEntry = (req, res, db) => {
-    authenticate(req, res, db, deleteTimeEntryHelper)
+  const deleteUser = (req, res, db) => {
+    authenticate(req, res, db, deleteUserHelper, false, false)
   }
 
-  const deleteTimeEntryHelper = (req, res, db) => {
+  const deleteUserHelper = (req, res, db, isAdmin, isManager) => {
+    console.log("GOT TO DELETE")
+    const { username } = req.body
+    //TODO Make it so that managers can't delete other managers/admin users.
+    db('users').where({username}).del()
+      .then(() => {
+        res.json({delete: 'true'})
+      })
+      .catch(err => res.status(400).json({dbError: 'db error'}))
+  }
+
+  const deleteTimeEntry = (req, res, db) => {
+    authenticate(req, res, db, deleteTimeEntryHelper, false, false)
+  }
+
+  const deleteTimeEntryHelper = (req, res, db, isAdmin, isManager) => {
     const { entry_id } = req.body
     db('timeentry').where({entry_id}).del()
       .then(() => {
@@ -191,10 +189,10 @@ const getTableData = (req, res, db) => {
   }
 
   const postTimeEntry = (req, res, db) => {
-    authenticate(req, res, db, postTimeEntryHelper)
+    authenticate(req, res, db, postTimeEntryHelper, false, false)
   }
 
-  const postTimeEntryHelper = (req, res, db) => {
+  const postTimeEntryHelper = (req, res, db, isAdmin, isManager) => {
     const { username, hours, workedon } = req.body
     const date = new Date()
     db('timeentry').insert({ username, hours, workedon, date })
@@ -206,11 +204,11 @@ const getTableData = (req, res, db) => {
   }
 
   const putTimeEntry = (req, res, db) => {
-    authenticate(req, res, db, putTimeEntryHelper)
+    authenticate(req, res, db, putTimeEntryHelper, false, false)
   }
 
 
-  const putTimeEntryHelper = (req, res, db) => {
+  const putTimeEntryHelper = (req, res, db, isAdmin, isManager) => {
     const { entry_id, hours, workedon } = req.body
     db('timeentry').where({entry_id}).update({hours, workedon})
       .returning('*')
@@ -228,9 +226,7 @@ const getTableData = (req, res, db) => {
     deleteTimeEntry,
     postTimeEntry,
     putTimeEntry,
-    getTableData,
-    postTableData,
-    putTableData,
-    deleteTableData
+    getAllUsers,
+    deleteUser
   }
   

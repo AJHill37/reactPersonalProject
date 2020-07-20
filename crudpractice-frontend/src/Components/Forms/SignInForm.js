@@ -28,7 +28,7 @@ class SignInForm extends React.Component {
         this.props.updateCurrentUser(user)
         this.props.toggle()
     })
-      .catch(err => console.log(err))
+    .catch(err => console.log(err))
   }
 
   componentDidMount(){

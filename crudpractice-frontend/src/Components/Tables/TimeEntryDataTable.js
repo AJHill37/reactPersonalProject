@@ -25,6 +25,10 @@ class TimeEntryDataTable extends Component {
     }
   }
 
+  componentDidMount(){
+    //this.props.getUserTimeEntries(this.props.currentUser)
+  }
+
   render() {
     let timeEntries = <></>
     if(this.props.timeEntries.length > 0){
