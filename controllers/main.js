@@ -17,9 +17,6 @@ const { query } = require('express');
     findUser(user, db)
       .then(foundUser => {
         if(!foundUser.username && user && user.password){
-          console.log('HERE AAAA')
-          console.log(foundUser)
-          console.log(user)
           hashPassword(user.password)
           .then((hashedPassword) => {
             delete user.password
@@ -207,12 +204,22 @@ const { query } = require('express');
 
   const deleteUserHelper = (req, res, db, isAdmin, isManager) => {
     const { username } = req.body
+    if(!username){
+      res.json({dbError: 'No user.'})
+      return
+    }
     //TODO Make it so that managers can't delete other managers/admin users.
-    db('users').where({username}).del()
-      .then(() => {
-        res.json({delete: 'true'})
-      })
-      .catch(err => res.status(400).json({dbError: err}))
+    findUser(req.body, db).then(foundUser => {
+      if((foundUser.isadmin || foundUser.ismanager) && !isAdmin){
+        res.json({dbError: 'Managers cannot delete other managers or admins.'})
+      } else {
+        db('users').where({username}).del()
+        .then(() => {
+          res.json({delete: 'true'})
+        })
+        .catch(err => res.status(400).json({dbError: err}))  
+      }
+    })
   }
 
   const deleteTimeEntry = (req, res, db) => {
