@@ -3,7 +3,7 @@ const bcrypt          = require('bcrypt')                         // bcrypt will
 const crypto          = require('crypto');                         // built-in encryption node module
 const { query } = require('express');
 
-  //USER AUTH SECTION
+  //USER AUTH SECTION 
 
   // app/models/user.js
   const signup = (req, res, db) => {

@@ -19,6 +19,8 @@ Make it so that users can edit the date of time entries. They should still sort 
 
 Update Edit button to say something like "User Settings"
 
+IMPORTANT:
+
 Nice to have but not strictly needed:
 Should probably remove "ID" from tables where the user doesn't care about that info.
 Make sure everything named "Item" gets updated.
