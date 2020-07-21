@@ -7,6 +7,9 @@ class AddEditTimeEntryForm extends React.Component {
     username: '',
     hours: 0,
     workedon: '',
+    note1: '',
+    note2: '',
+    note3: ''
   }
 
   onChange = e => {
@@ -14,6 +17,8 @@ class AddEditTimeEntryForm extends React.Component {
   }
 
   submitFormAddTimeEntry = e => {
+    console.log('tad')
+    console.log(this.state)
     e.preventDefault()
     fetch('http://localhost:3000/postTimeEntry/' + this.props.currentUser.username + '/' + this.props.currentUser.token, {
       method: 'post',
@@ -23,7 +28,11 @@ class AddEditTimeEntryForm extends React.Component {
       body: JSON.stringify({
         username: this.props.currentUser.username,
         hours: this.state.hours,
-        workedon: this.state.workedon
+        workedon: this.state.workedon,
+        note1: this.state.note1,
+        note2: this.state.note2,
+        note3: this.state.note3
+
       })
     })
       .then(response => response.json())
@@ -49,7 +58,10 @@ class AddEditTimeEntryForm extends React.Component {
       body: JSON.stringify({
         entry_id: this.state.entry_id,
         hours: this.state.hours,
-        workedon: this.state.workedon
+        workedon: this.state.workedon,
+        note1: this.state.note1,
+        note2: this.state.note2,
+        note3: this.state.note3
       })
     })
       .then(response => response.json())
@@ -68,8 +80,8 @@ class AddEditTimeEntryForm extends React.Component {
   componentDidMount(){
     // if timeEntry exists, populate the state with proper data
     if(this.props.timeEntry){
-      const { entry_id, username, hours, workedon } = this.props.timeEntry
-      this.setState({ entry_id, username, hours, workedon })
+      const { entry_id, username, hours, workedon, note1, note2, note3 } = this.props.timeEntry
+      this.setState({ entry_id, username, hours, workedon, note1, note2, note3 })
     }
   }
 
@@ -78,11 +90,23 @@ class AddEditTimeEntryForm extends React.Component {
       <Form onSubmit={this.props.timeEntry ? this.submitFormEditTimeEntry : this.submitFormAddTimeEntry}>
         <FormGroup>
           <Label for="hours">Hours</Label>
-          <Input type="number" name="hours" id="hours" onChange={this.onChange} value={this.state.hours ? this.state.hours : 0} />
+          <Input type="number" name="hours" id="hours" onChange={this.onChange} value={this.state.hours ? this.state.hours : ''} />
         </FormGroup>
         <FormGroup>
           <Label for="workedon">What did you work on?</Label>
           <Input type="text" name="workedon" id="workedon" onChange={this.onChange} value={this.state.workedon === null ? '' : this.state.workedon}  />
+        </FormGroup>
+        <FormGroup>
+          <Label for="note1">Note1</Label>
+          <Input type="text" name="note1" id="note1" onChange={this.onChange} value={this.state.note1 === null ? '' : this.state.note1}  />
+        </FormGroup>
+        <FormGroup>
+          <Label for="note2">Note2</Label>
+          <Input type="text" name="note2" id="note2" onChange={this.onChange} value={this.state.note2 === null ? '' : this.state.note2}  />
+        </FormGroup>
+        <FormGroup>
+          <Label for="note3">Note3</Label>
+          <Input type="text" name="note3" id="note3" onChange={this.onChange} value={this.state.note3 === null ? '' : this.state.note3}  />
         </FormGroup>
         <Button>Submit</Button>
       </Form>

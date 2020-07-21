@@ -24,7 +24,14 @@ class AddEditUserModalForm extends Component {
       let button = ''
       let title = ''
 
-      if(label === 'Edit'){
+      if(label === 'User Settings'){
+        button = <Button
+                  color="warning"
+                  onClick={this.toggle}
+                  style={{float: "right", marginRight:"10px"}}>{label}
+                </Button>
+        title = 'User Settings'
+      } else if(label === 'Edit'){
         button = <Button
                   color="warning"
                   onClick={this.toggle}

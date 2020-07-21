@@ -32,3 +32,55 @@ Make it so that google doesn't yell at you when you log in about how your passwo
 Make it so that users can log out. Easy
 Make it so that red highlighting happens depending on preferred hours. Easy
 
+
+
+  constructFakeNotes(){
+    let notes = []
+    notes.push({'title' : 'Note1', 'content' : 'Wow! This is a really long string im actually pretty impressed I can write so much.'})
+    notes.push({'title' : 'Note2', 'content' : 'This is note2'})
+    notes.push({'title' : 'Note3', 'content' : 'This is note3'})
+    for(let i = 0; i < notes.length; ++i){
+      let note = notes[i]
+      this.setState({ [note.title] : note.content}, () => {console.log(this.state)})
+    }
+    return notes
+  }
+
+  constructNotesForm(notes){
+    let notesForm = <></>
+    /*
+            <td>
+              <div style={{width:"110px"}}>
+                <AddEditTimeEntryModalForm buttonLabel="Edit" timeEntry={timeEntry} updateTimeEntryState={this.props.updateTimeEntryState} currentUser={this.props.currentUser}/>
+                {' '}
+                <Button color="danger" onClick={() => this.deleteItem(timeEntry.entry_id, this.props.currentUser)}>Del</Button>
+              </div>
+            </td>
+     */
+    if(notes.length > 0){
+      notesForm = notes.map(note => {
+        this.setState({ [note.title] : note.content}, () => {console.log(this.state)})
+        return (
+          <tr key={note.title}>
+            <th scope="row">{note.title}</th>
+            <td>{note.content}</td>
+          </tr>
+          )
+        })      
+    }
+
+    return (
+      <Table responsive hover>
+        <thead>
+          <tr>
+            <th>Note Title</th>
+            <th>Content</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {notesForm}
+        </tbody>
+      </Table>
+    )
+  }

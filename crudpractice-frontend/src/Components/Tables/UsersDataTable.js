@@ -28,13 +28,16 @@ class UsersDataTable extends Component {
     let users = <></>
     if(this.props.users.length > 0){
         users = this.props.users.map(user => {
+        let adminButton = <Button style={{float: "left", marginRight: "10px"}} color="warning" onClick={() => this.props.updateCurrentUser(user)}>Edit</Button>
+        let managerButton = <AddEditUserModalForm buttonLabel="Edit" user={user} updateUserState={this.props.updateUserState} currentUser={this.props.currentUser}/>
+        let editButton = this.props.currentUser.isadmin && (!user.isadmin && !user.ismanager) ? adminButton : managerButton
         return (
           <tr key={user.username}>
             <th scope="row">{user.username}</th>
             <td>{user.preferredworkinghourperday}</td>
             <td>
               <div style={{width:"110px"}}>
-                <AddEditUserModalForm buttonLabel="Edit" user={user} updateUserState={this.props.updateUserState} currentUser={this.props.currentUser}/>
+                {editButton}
                 {' '}
                 <Button color="danger" onClick={() => this.deleteUser(user.username, this.props.currentUser)}>Del</Button>
               </div>

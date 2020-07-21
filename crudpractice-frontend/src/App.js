@@ -7,30 +7,22 @@ import AddEditTimeEntryModalForm from './Components/Modals/AddEditTimeEntryModal
 import TimeEntryDataTable from './Components/Tables/TimeEntryDataTable'
 import UsersDataTable from './Components/Tables/UsersDataTable'
 import { CSVLink } from "react-csv"
-import { Button } from 'reactstrap';
-import NotesDataTable from './Components/Tables/NotesDataTable'
+import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
 class App extends Component {
   state = {
     timeEntries: [],
     users: [],
-    notes: []
+    username: '',
+    password: ''
   }
 
-  getAllUsers(user){
+  getAllUsers(){
     fetch('http://localhost:3000/getAllUsers/' + this.state.currentUser.username + '/' + this.state.currentUser.token)
       .then(response => response.json())
       .then(users => {
-        console.log(users)
         this.setState({users})
       })
-      .catch(err => console.log(err))
-  }
-
-  getTimeEntryNotes(){
-    fetch('http://localhost:3000/getTimeEntryNotes/' + this.state.currentTimeEntry.entry_id +  '/' + this.state.currentUser.username + '/' + this.state.currentUser.token)
-      .then(response => response.json())
-      .then(notes => this.setState({notes}))
       .catch(err => console.log(err))
   }
 
@@ -42,7 +34,6 @@ class App extends Component {
   }
 
   addUserToState = (user) => {
-    console.log('Got to add user')
     this.setState(prevState => ({
       users: prevState.users.length ? [...prevState.users, user] : [user]
     }))
@@ -57,19 +48,22 @@ class App extends Component {
   updateCurrentUser = (user) => {
     this.setState({currentUser: user}, () => {
       if(this.state.currentUser){
-        this.getUserTimeEntries()
-        //this.getAllUsers()  
+        if(this.state.currentUser.isadmin || this.state.currentUser.ismanager) {
+          this.getAllUsers()
+          if(this.state.currentUser.isadmin){
+            this.updateCurrentAdminUser(user)
+          }
+        } else {
+          this.getUserTimeEntries()
+        }
       }
     })
   }
 
-  updateCurrentTimeEntry = (timeEntry) => {
-    this.setState({currentTimeEntry: timeEntry}, () => {
-      if(this.state.currentTimeEntry){
-        this.getTimeEntryNotes()
-      }
-    })
+  updateCurrentAdminUser = (user) => {
+    this.setState({currentAdminUser: user})
   }
+
 
   updateTimeEntryState = (timeEntry) => {
     const timeEntryIndex = this.state.timeEntries.findIndex(data => data.entry_id === timeEntry.entry_id)
@@ -108,6 +102,36 @@ class App extends Component {
     this.setState({ users: updatedUsers })
   }
 
+  onChange = e => {
+    this.setState({[e.target.name]: e.target.value})
+  }
+
+  toggle = () => {
+    this.setState(prevState => ({
+      modal: !prevState.modal
+    }))
+  }
+
+  submitFormSignIn = e => {
+    e.preventDefault()
+    fetch('http://localhost:3000/signin', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: this.state.username,
+        password: this.state.password
+      })
+    })
+      .then(response => response.json())
+      .then(user => {
+        this.updateCurrentUser(user)
+        this.toggle()
+    })
+    .catch(err => console.log(err))
+  }
+
   componentDidMount(){
   }
 
@@ -115,16 +139,32 @@ class App extends Component {
    * This method exists because CSVLink doesn't like empty arrays as data, so we just pass in an empty string
    * if there aren't any items.
    */
-  gCSV(items){
-    const isItems = typeof items != "undefined" && items != null && items.length != null && items.length > 0
-    if(isItems){
+  gCSV(timeEntries){
+    const isTimeEntries = typeof timeEntries != "undefined" && timeEntries != null && timeEntries.length != null && timeEntries.length > 0
+
+    for(let i = 0; i < timeEntries.length; ++i){
+      if(timeEntries[i].username === ""){
+        delete timeEntries[i].username
+      }
+      if(timeEntries[i].note1 === ""){
+        delete timeEntries[i].note1
+      }
+      if(timeEntries[i].note2 === ""){
+        delete timeEntries[i].note2
+      }
+      if(timeEntries[i].note3 === ""){
+        delete timeEntries[i].note3
+      }
+    }
+
+    if(isTimeEntries){
       return (
         <CSVLink
           filename={"db.csv"}
           color="primary"
           style={{float: "left", marginRight: "10px"}}
           className="btn btn-primary"
-          data={items}>
+          data={timeEntries}>
           Download CSV
         </CSVLink>            
       )
@@ -143,45 +183,48 @@ class App extends Component {
   }
 
   defaultScreen(){
+    //            <SignInModalForm buttonLabel="Sign In" updateCurrentUser={this.updateCurrentUser}/>
     return (
       <Container className="App">
         <Row>
           <Col>
-            <h1 style={{margin: "20px 0"}}>ABC</h1>
+            <h1 style={{margin: "20px 0"}}>Timetracker</h1>
           </Col>
         </Row>
         <Row>
           <Col>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
+          <Form onSubmit={this.submitFormSignIn}>
+            <FormGroup>
+              <Label for="username">Username</Label>
+              <Input type="text" name="username" id="username" onChange={this.onChange} value={this.state.username === null ? '' : this.state.username} />
+            </FormGroup>
+            <FormGroup>
+              <Label for="password">Password</Label>
+              <Input type="password" name="password" id="password" onChange={this.onChange} value={this.state.password === null ? '' : this.state.password} />
+            </FormGroup>
+            <Button style={{float: 'left'}}>Submit</Button>
             <SignUpModalForm buttonLabel="Sign Up" updateCurrentUser={this.updateCurrentUser}/>
-            <SignInModalForm buttonLabel="Sign In" updateCurrentUser={this.updateCurrentUser}/>
+          </Form>
           </Col>
         </Row>
       </Container>
     )
   }
 
-  userScreen() {
-    const csvLink = this.gCSV(this.state.items)
+  clearUsers(){
+    this.updateCurrentUser(null)
+    this.updateCurrentAdminUser(null)
+    this.setState({username: null})
+    this.setState({password: null})
+  }
 
-    if(this.state.timeEntries.length > 0){
-      this.updateCurrentTimeEntry(this.state.timeEntries[0])
+  userScreen() {
+    const csvLink = this.gCSV(this.state.timeEntries)
+
+    let backToAdminButton = <></>
+    if(this.state.currentAdminUser){
+      backToAdminButton = <Button style={{margin: "9px 10px", paddingRight : "9px" , float: 'right'}} color="success" onClick={() => this.updateCurrentUser(this.state.currentAdminUser)}>Back to Admin</Button>
     }
-  /*
-    <Row>
-    <Col>
-      <UsersDataTable users={this.state.users} updateUserState={this.updateUserState} deleteUserFromState={this.deleteUserFromState} currentUser={this.state.currentUser} />
-    </Col>
-  </Row>
-  <Row>
-    <Col>
-      <AddEditUserModalForm buttonLabel="Add User" addUserToState={this.addUserToState} currentUser={this.state.currentUser}/>
-    </Col>
-  </Row>
-  */
 
     return (
       <Container className="App">
@@ -189,13 +232,9 @@ class App extends Component {
           <Col>
             <div style={{width:"100%"}}>
               <h1 style={{ float: 'left'}}>Time Entries</h1>
-              <Button style={{margin: "9px 0", float: 'right'}} color="danger" onClick={() => this.updateCurrentUser(null)}>Log Out</Button>
+              <Button style={{margin: "9px 0", float: 'right'}} color="danger" onClick={() => this.clearUsers()}>Log Out</Button>
+              {backToAdminButton}
             </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <NotesDataTable getTimeEntryNotes={this.getTimeEntryNotes} notes={this.state.notes} updateNoteState={this.updateNoteState} deleteNoteFromState={this.deleteNoteFromState} currentTimeEntry={this.state.currentTimeEntry} />
           </Col>
         </Row>
         <Row>
@@ -207,16 +246,45 @@ class App extends Component {
           <Col>
             {csvLink}
             <AddEditTimeEntryModalForm buttonLabel="Add Time Entry" addTimeEntryToState={this.addTimeEntryToState} currentUser={this.state.currentUser}/>
-            <AddEditUserModalForm buttonLabel="Edit" updateCurrentUser={this.updateCurrentUser} currentUser={this.state.currentUser} user={this.state.currentUser}/>
+            <AddEditUserModalForm buttonLabel="User Settings" updateCurrentUser={this.updateCurrentUser} currentUser={this.state.currentUser} user={this.state.currentUser}/>
           </Col>
         </Row>
       </Container>
     )
   }
 
+  adminScreen() {
+    return (
+      <Container className="App">
+        <Row>
+          <Col>
+            <div style={{width:"100%"}}>
+              <h1 style={{ float: 'left'}}>Users</h1>
+              <Button style={{margin: "9px 0", float: 'right'}} color="danger" onClick={() => this.clearUsers()}>Log Out</Button>
+            </div>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <UsersDataTable getAllUsers={this.getAllUsers} users={this.state.users} updateUserState={this.updateUserState} deleteUserFromState={this.deleteUserFromState} updateCurrentUser={this.updateCurrentUser} currentUser={this.state.currentUser} />
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <AddEditUserModalForm buttonLabel="Add User" addUserToState={this.addUserToState} currentUser={this.state.currentUser}/>
+            <AddEditUserModalForm buttonLabel="User Settings" updateCurrentUser={this.updateCurrentUser} currentUser={this.state.currentUser} user={this.state.currentUser}/>
+          </Col>
+        </Row>
+      </Container>
+    )
+  }
+
+
   render() {
-    const isUser = this.state.currentUser
-    if (isUser) {
+    //const isUser = this.state.currentUser
+    if (this.state.currentUser && (this.state.currentUser.isadmin || this.state.currentUser.ismanager)) {
+      return ( this.adminScreen() )
+    } else if (this.state.currentUser) {
       return ( this.userScreen() )
     } else {
       return ( this.defaultScreen() )

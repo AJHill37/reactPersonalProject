@@ -1,6 +1,7 @@
 const environment     = process.env.NODE_ENV || 'development';    // set environment
 const bcrypt          = require('bcrypt')                         // bcrypt will encrypt passwords to be saved in db
 const crypto          = require('crypto');                         // built-in encryption node module
+const { query } = require('express');
 
   //USER AUTH SECTION
 
@@ -9,7 +10,6 @@ const crypto          = require('crypto');                         // built-in e
     const user = req.body
     user.isAdmin = false;
     user.isManager = false;
-    console.log(user)
     hashPassword(user.password)
       .then((hashedPassword) => {
         delete user.password
@@ -108,9 +108,9 @@ const crypto          = require('crypto');                         // built-in e
     .then(data => {
       if(data.length > 0 && 
         data[0].username === username &&
-        (!needAdmin || data[0].isAdmin) &&
-        (!needManager || data[0].isManager || data[0].isAdmin)){
-        func(req, res, db, data[0].isAdmin, data[0].isManager)
+        (!needAdmin || data[0].isadmin) &&
+        (!needManager || data[0].ismanager || data[0].isadmin)){
+        func(req, res, db, data[0].isadmin, data[0].ismanager)
       } else {
         res.json({dbError: 'Failed to authenticate'})
       }
@@ -122,24 +122,23 @@ const crypto          = require('crypto');                         // built-in e
   //Admin/User Manager section
   
   const getAllUsers = (req, res, db) => {
-    authenticate(req, res, db, getAllUsersHelper, false, false)
+    authenticate(req, res, db, getAllUsersHelper, false, true)
   }
 
   const getAllUsersHelper = (req, res, db, isAdmin, isManager) => {
-    //let query = 'SELECT * FROM users WHERE isAdmin = false AND isManager = false'
-    //if(isAdmin) {
-      query = 'SELECT * FROM users'
-    //}
-    //TODO: Managers and admins see users differently
-    db.select('*').from('users').where('username', '!=', req.params.username)
-    .then(items => {
-      if(items.length){
-        res.json(items)
+    let query = 'SELECT * FROM users WHERE username != ' + '\'' +  req.params.username + '\''
+    if(!isAdmin) {
+      query = query + ' AND isadmin = false AND ismanager = false'
+    }
+    db.raw(query)
+    .then(data => {
+      if(data.rows.length){
+        res.json(data.rows)
       } else {
         res.json({dataExists: 'false'})
       }
     })
-    .catch(err => res.status(400).json({dbError: 'db error'}))  
+    .catch(err => res.status(400).json({dbError: err}))  
   }
 
 
@@ -153,8 +152,6 @@ const crypto          = require('crypto');                         // built-in e
     db.select('*').from('timeentry').where('username', '=', req.params.username)
     .then(items => {
       if(items.length){
-        console.log('ttt')
-        console.log(items)
         res.json(items)
       } else {
         res.json({dataExists: 'false'})
@@ -168,7 +165,6 @@ const crypto          = require('crypto');                         // built-in e
   }
 
   const deleteUserHelper = (req, res, db, isAdmin, isManager) => {
-    console.log("GOT TO DELETE")
     const { username } = req.body
     //TODO Make it so that managers can't delete other managers/admin users.
     db('users').where({username}).del()
@@ -196,9 +192,9 @@ const crypto          = require('crypto');                         // built-in e
   }
 
   const postTimeEntryHelper = (req, res, db, isAdmin, isManager) => {
-    const { username, hours, workedon } = req.body
+    const { username, hours, workedon, note1, note2, note3 } = req.body
     const date = new Date()
-    db('timeentry').insert({ username, hours, workedon, date })
+    db('timeentry').insert({ username, hours, workedon, note1, note2, note3, date })
       .returning('*')
       .then(timeEntry => {
         res.json(timeEntry)
@@ -212,8 +208,8 @@ const crypto          = require('crypto');                         // built-in e
 
 
   const putTimeEntryHelper = (req, res, db, isAdmin, isManager) => {
-    const { entry_id, hours, workedon } = req.body
-    db('timeentry').where({entry_id}).update({hours, workedon})
+    const { entry_id, hours, workedon, note1, note2, note3 } = req.body
+    db('timeentry').where({entry_id}).update({hours, workedon, note1, note2, note3})
       .returning('*')
       .then(item => {
         res.json(item)

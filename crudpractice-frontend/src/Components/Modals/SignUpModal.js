@@ -27,7 +27,7 @@ class SignUpModalForm extends Component {
       button = <Button
                 color="primary"
                 onClick={this.toggle}
-                style={{float: "left", marginRight:"10px"}}>{label}
+                style={{float: "right", marginRight:"10px"}}>{label}
               </Button>
       title = 'Sign Up'
 
