@@ -17,8 +17,6 @@ class AddEditTimeEntryForm extends React.Component {
   }
 
   submitFormAddTimeEntry = e => {
-    console.log('tad')
-    console.log(this.state)
     e.preventDefault()
     fetch('http://localhost:3000/postTimeEntry/' + this.props.currentUser.username + '/' + this.props.currentUser.token, {
       method: 'post',
@@ -32,7 +30,6 @@ class AddEditTimeEntryForm extends React.Component {
         note1: this.state.note1,
         note2: this.state.note2,
         note3: this.state.note3
-
       })
     })
       .then(response => response.json())

@@ -28,7 +28,9 @@ class App extends Component {
   getUserTimeEntries(){
     fetch('http://localhost:3000/getTimeEntries/' + this.state.currentUser.username + '/' + this.state.currentUser.token)
       .then(response => response.json())
-      .then(timeEntries => this.setState({timeEntries}))
+      .then(timeEntries => this.setState({timeEntries}, () => {
+        const sortedTimeEntries = this.state.timeEntries.sort((a, b) => b.date - a.date)
+      } ))
       .catch(err => console.log(err))
   }
 
@@ -182,7 +184,6 @@ class App extends Component {
   }
 
   defaultScreen(){
-    //            <SignInModalForm buttonLabel="Sign In" updateCurrentUser={this.updateCurrentUser}/>
     return (
       <Container className="App">
         <Row>

@@ -45,18 +45,19 @@ class TimeEntryDataTable extends Component {
 
   render() {
     let timeEntries = <></>
+    const sortCopy = [].concat(this.props.timeEntries)
+    sortCopy.sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
     let dayMap = this.constructHoursWorkedPerDay(this.props.timeEntries)
-    if(this.props.timeEntries.length > 0){
-      timeEntries = this.props.timeEntries.map(timeEntry => {
+    if(sortCopy.length > 0){
+      timeEntries = sortCopy.map(timeEntry => {
         const entryDay = timeEntry.date.split('T')[0]
         const rowStyle = Number(this.props.currentUser.preferredworkinghourperday) <= dayMap[entryDay] ? { backgroundColor: 'lightgreen'} : { backgroundColor: 'lightpink'}
         return (
           <tr key={timeEntry.entry_id} style={rowStyle}>
-            <th scope="row">{timeEntry.entry_id}</th>
+            <th scope="row">{entryDay}</th>
             <td>{timeEntry.username}</td>
             <td>{timeEntry.hours}</td>
             <td>{timeEntry.workedon}</td>
-            <td>{timeEntry.date}</td>
             <td>
               <div style={{width:"110px"}}>
                 <AddEditTimeEntryModalForm buttonLabel="Edit" timeEntry={timeEntry} updateTimeEntryState={this.props.updateTimeEntryState} currentUser={this.props.currentUser}/>
@@ -73,11 +74,10 @@ class TimeEntryDataTable extends Component {
       <Table responsive hover>
         <thead>
           <tr>
-            <th>ID</th>
+            <th>Date</th>
             <th>Username</th>
             <th>Hours</th>
             <th>What was worked on</th>
-            <th>Date</th>
             <th>Actions</th>
           </tr>
         </thead>
