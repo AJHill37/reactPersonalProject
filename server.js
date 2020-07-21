@@ -52,7 +52,7 @@ app.use(bodyParser.json())
 app.use(morgan('combined')) // use 'tiny' or 'combined'
 
 // App Routes - Auth
-app.get('/', (req, res) => res.send('hello world'))
+app.get('/', (req, res) => res.send('hello worlder'))
 
 app.post('/signup', (req, res) => main.signup(req, res, db))
 app.post('/signin', (req, res) => main.signin(req, res, db))

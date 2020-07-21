@@ -157,11 +157,11 @@ const { query } = require('express');
         res.json({dataExists: 'false'})
       }
     })
-    .catch(err => res.status(400).json({dbError: 'db error'}))  
+    .catch(err => res.status(400).json({dbError: err}))  
   }
 
   const deleteUser = (req, res, db) => {
-    authenticate(req, res, db, deleteUserHelper, false, false)
+    authenticate(req, res, db, deleteUserHelper, false, true)
   }
 
   const deleteUserHelper = (req, res, db, isAdmin, isManager) => {
@@ -171,7 +171,7 @@ const { query } = require('express');
       .then(() => {
         res.json({delete: 'true'})
       })
-      .catch(err => res.status(400).json({dbError: 'db error'}))
+      .catch(err => res.status(400).json({dbError: err}))
   }
 
   const deleteTimeEntry = (req, res, db) => {
@@ -184,7 +184,7 @@ const { query } = require('express');
       .then(() => {
         res.json({delete: 'true'})
       })
-      .catch(err => res.status(400).json({dbError: 'db error'}))
+      .catch(err => res.status(400).json({dbError: err}))
   }
 
   const postTimeEntry = (req, res, db) => {
