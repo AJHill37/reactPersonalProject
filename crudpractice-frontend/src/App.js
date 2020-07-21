@@ -7,11 +7,14 @@ import AddEditTimeEntryModalForm from './Components/Modals/AddEditTimeEntryModal
 import TimeEntryDataTable from './Components/Tables/TimeEntryDataTable'
 import UsersDataTable from './Components/Tables/UsersDataTable'
 import { CSVLink } from "react-csv"
+import { Button } from 'reactstrap';
+import NotesDataTable from './Components/Tables/NotesDataTable'
 
 class App extends Component {
   state = {
     timeEntries: [],
-    users: []
+    users: [],
+    notes: []
   }
 
   getAllUsers(user){
@@ -24,6 +27,12 @@ class App extends Component {
       .catch(err => console.log(err))
   }
 
+  getTimeEntryNotes(){
+    fetch('http://localhost:3000/getTimeEntryNotes/' + this.state.currentTimeEntry.entry_id +  '/' + this.state.currentUser.username + '/' + this.state.currentUser.token)
+      .then(response => response.json())
+      .then(notes => this.setState({notes}))
+      .catch(err => console.log(err))
+  }
 
   getUserTimeEntries(){
     fetch('http://localhost:3000/getTimeEntries/' + this.state.currentUser.username + '/' + this.state.currentUser.token)
@@ -46,10 +55,19 @@ class App extends Component {
   }
 
   updateCurrentUser = (user) => {
-    console.log(user)
     this.setState({currentUser: user}, () => {
-      this.getUserTimeEntries()
-      this.getAllUsers()
+      if(this.state.currentUser){
+        this.getUserTimeEntries()
+        //this.getAllUsers()  
+      }
+    })
+  }
+
+  updateCurrentTimeEntry = (timeEntry) => {
+    this.setState({currentTimeEntry: timeEntry}, () => {
+      if(this.state.currentTimeEntry){
+        this.getTimeEntryNotes()
+      }
     })
   }
 
@@ -149,11 +167,35 @@ class App extends Component {
   userScreen() {
     const csvLink = this.gCSV(this.state.items)
 
+    if(this.state.timeEntries.length > 0){
+      this.updateCurrentTimeEntry(this.state.timeEntries[0])
+    }
+  /*
+    <Row>
+    <Col>
+      <UsersDataTable users={this.state.users} updateUserState={this.updateUserState} deleteUserFromState={this.deleteUserFromState} currentUser={this.state.currentUser} />
+    </Col>
+  </Row>
+  <Row>
+    <Col>
+      <AddEditUserModalForm buttonLabel="Add User" addUserToState={this.addUserToState} currentUser={this.state.currentUser}/>
+    </Col>
+  </Row>
+  */
+
     return (
       <Container className="App">
         <Row>
           <Col>
-            <h1 style={{margin: "20px 0"}}>ABC</h1>
+            <div style={{width:"100%"}}>
+              <h1 style={{ float: 'left'}}>Time Entries</h1>
+              <Button style={{margin: "9px 0", float: 'right'}} color="danger" onClick={() => this.updateCurrentUser(null)}>Log Out</Button>
+            </div>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <NotesDataTable getTimeEntryNotes={this.getTimeEntryNotes} notes={this.state.notes} updateNoteState={this.updateNoteState} deleteNoteFromState={this.deleteNoteFromState} currentTimeEntry={this.state.currentTimeEntry} />
           </Col>
         </Row>
         <Row>
@@ -165,16 +207,7 @@ class App extends Component {
           <Col>
             {csvLink}
             <AddEditTimeEntryModalForm buttonLabel="Add Time Entry" addTimeEntryToState={this.addTimeEntryToState} currentUser={this.state.currentUser}/>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <UsersDataTable users={this.state.users} updateUserState={this.updateUserState} deleteUserFromState={this.deleteUserFromState} currentUser={this.state.currentUser} />
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <AddEditUserModalForm buttonLabel="Add User" addUserToState={this.addUserToState} currentUser={this.state.currentUser}/>
+            <AddEditUserModalForm buttonLabel="Edit" updateCurrentUser={this.updateCurrentUser} currentUser={this.state.currentUser} user={this.state.currentUser}/>
           </Col>
         </Row>
       </Container>

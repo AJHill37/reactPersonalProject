@@ -6,7 +6,7 @@ class SignUpForm extends React.Component {
   state = {
     username: '',
     password: '',
-    preferredWorkingHourPerDay: 0,
+    preferredworkinghourperday: 0,
   }
 
   onChange = e => {
@@ -23,12 +23,12 @@ class SignUpForm extends React.Component {
       body: JSON.stringify({
         username: this.state.username,
         password: this.state.password,
-        preferredWorkingHourPerDay: this.state.preferredWorkingHourPerDay,
+        preferredworkinghourperday: this.state.preferredworkinghourperday,
       })
     })
       .then(response => response.json())
-      .then(user => {
-        this.props.updateCurrentUser(user)
+      .then(data => {
+        this.props.updateCurrentUser(data.user)
         this.props.toggle()
     })
       .catch(err => console.log(err))
@@ -54,8 +54,8 @@ class SignUpForm extends React.Component {
           <Input type="password" name="password" id="password" onChange={this.onChange} value={this.state.password === null ? '' : this.state.password}  />
         </FormGroup>
         <FormGroup>
-          <Label for="preferredWorkingHourPerDay">Preferred working hours per day</Label>
-          <Input type="number" name="preferredWorkingHourPerDay" id="preferredWorkingHourPerDay" onChange={this.onChange} value={this.state.preferredWorkingHourPerDay === null ? '' : this.state.preferredWorkingHourPerDay}  />
+          <Label for="preferredworkinghourperday">Preferred working hours per day</Label>
+          <Input type="number" name="preferredworkinghourperday" id="preferredworkinghourperday" onChange={this.onChange} value={this.state.preferredworkinghourperday === null ? '' : this.state.preferredworkinghourperday}  />
         </FormGroup>
         <Button>Submit</Button>
       </Form>

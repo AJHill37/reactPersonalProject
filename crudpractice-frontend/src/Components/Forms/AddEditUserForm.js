@@ -6,6 +6,7 @@ class AddEditUserForm extends React.Component {
     username: '',
     password: '',
     preferredworkinghourperday: '',
+    currentusername: '',
   }
 
   onChange = e => {
@@ -44,16 +45,23 @@ class AddEditUserForm extends React.Component {
       body: JSON.stringify({
         username: this.state.username,
         password: this.state.password,
-        preferredworkinghourperday: this.state.preferredworkinghourperday
+        preferredworkinghourperday: this.state.preferredworkinghourperday,
+        currentUserName: this.state.currentusername
       })
     })
       .then(response => response.json())
-      .then(users => {
-        if(Array.isArray(users)) {
-          this.props.updateUserState(users[0])
+      .then(data => {
+        if(Array.isArray(data.rows)) {
+          if(this.props.updateUserState){
+            this.props.updateUserState(data.rows[0])
+          }
+          if(this.props.updateCurrentUser){
+            this.props.updateCurrentUser(data.rows[0])
+          }
           this.props.toggle()
         } else {
           console.log('failure')
+          console.log(data)
         }
       })
       .catch(err => console.log(err))
@@ -64,6 +72,7 @@ class AddEditUserForm extends React.Component {
     if(this.props.user){
       const { username, preferredworkinghourperday } = this.props.user
       this.setState({ username, preferredworkinghourperday})
+      this.setState({ currentusername: username})
     }
   }
 

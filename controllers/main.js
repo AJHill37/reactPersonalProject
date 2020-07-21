@@ -9,6 +9,7 @@ const crypto          = require('crypto');                         // built-in e
     const user = req.body
     user.isAdmin = false;
     user.isManager = false;
+    console.log(user)
     hashPassword(user.password)
       .then((hashedPassword) => {
         delete user.password
@@ -152,6 +153,8 @@ const crypto          = require('crypto');                         // built-in e
     db.select('*').from('timeentry').where('username', '=', req.params.username)
     .then(items => {
       if(items.length){
+        console.log('ttt')
+        console.log(items)
         res.json(items)
       } else {
         res.json({dataExists: 'false'})
@@ -218,6 +221,37 @@ const crypto          = require('crypto');                         // built-in e
       .catch(err => res.status(400).json({dbError: 'db error'}))
   }
 
+  const putUser = (req, res, db) => {
+    authenticate(req, res, db, putUserHelper, false, false)
+  }
+
+
+  const putUserHelper = (req, res, db, isAdmin, isManager) => {
+    let password_digest
+    const { username, password, preferredworkinghourperday, currentUserName} = req.body
+    if(!isManager && !isAdmin && currentUserName != req.params.username){
+      res.json({dbError: 'Tried to update user without permission'})
+      return
+    }
+    let changePass = password != ''
+    let query = changePass ? "UPDATE users SET username = ?, password_digest = ?, preferredworkinghourperday = ? WHERE username = ? RETURNING username, token, preferredworkinghourperday, isadmin, ismanager, created_at" : 
+                             "UPDATE users SET username = ?, preferredworkinghourperday = ? WHERE username = ? RETURNING username, token, preferredworkinghourperday, isadmin, ismanager, created_at"
+    hashPassword(password)
+    .then((hashedPassword) => {
+      delete password
+      password_digest = hashedPassword
+    })
+    .then(() => {
+      db.raw(query, changePass ? [username, password_digest, preferredworkinghourperday, currentUserName] : [username, preferredworkinghourperday, currentUserName])
+        //db('users').where({username: currentUserName}).update({username, password_digest, preferredworkinghourperday})
+        //.returning('*')
+        .then(item => {
+          res.json(item)
+        })
+        .catch(err => res.status(400).json({dbError: err}))
+    })
+  }
+
 
   module.exports = {
     signup,
@@ -227,6 +261,7 @@ const crypto          = require('crypto');                         // built-in e
     postTimeEntry,
     putTimeEntry,
     getAllUsers,
-    deleteUser
+    deleteUser,
+    putUser
   }
   

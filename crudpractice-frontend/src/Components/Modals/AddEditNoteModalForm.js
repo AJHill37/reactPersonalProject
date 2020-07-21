@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap'
-import AddEditUserForm from '../Forms/AddEditUserForm'
+import AddEditNoteForm from '../Forms/AddEditNoteForm'
 
-class AddEditUserModalForm extends Component {
+class AddEditNoteModalForm extends Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -30,14 +30,14 @@ class AddEditUserModalForm extends Component {
                   onClick={this.toggle}
                   style={{float: "left", marginRight:"10px"}}>{label}
                 </Button>
-        title = 'Edit User'
+        title = 'Edit Time Entry'
       } else {
         button = <Button
                   color="success"
                   onClick={this.toggle}
                   style={{float: "left", marginRight:"10px"}}>{label}
                 </Button>
-        title = 'Add New User'
+        title = 'Add New Time Entry'
       }
 
 
@@ -47,13 +47,12 @@ class AddEditUserModalForm extends Component {
         <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
           <ModalHeader toggle={this.toggle} close={closeBtn}>{title}</ModalHeader>
           <ModalBody>
-            <AddEditUserForm
-              addUserToState={this.props.addUserToState}
-              updateUserState={this.props.updateUserState}
-              updateCurrentUser={this.props.updateCurrentUser}
+            <AddEditNoteForm
+              addTimeEntryToState={this.props.addTimeEntryToState}
+              updateTimeEntryState={this.props.updateTimeEntryState}
               currentUser={this.props.currentUser}
               toggle={this.toggle}
-              user={this.props.user} />
+              timeEntry={this.props.timeEntry} />
           </ModalBody>
         </Modal>
       </div>
@@ -61,4 +60,4 @@ class AddEditUserModalForm extends Component {
   }
 }
 
-export default AddEditUserModalForm
+export default AddEditNoteModalForm

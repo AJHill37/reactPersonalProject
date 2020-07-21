@@ -63,6 +63,7 @@ app.put('/putTimeEntry/:username/:token', (req, res) => main.putTimeEntry(req, r
 
 app.get('/getAllUsers/:username/:token', (req, res) => main.getAllUsers(req, res, db))
 app.delete('/deleteUser/:username/:token', (req, res) => main.deleteUser(req, res, db))
+app.put('/putUser/:username/:token', (req, res) => main.putUser(req, res, db))
 
 // App Server Connection
 app.listen(process.env.PORT || 3000, () => {

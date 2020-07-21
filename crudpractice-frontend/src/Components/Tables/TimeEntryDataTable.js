@@ -29,12 +29,29 @@ class TimeEntryDataTable extends Component {
     //this.props.getUserTimeEntries(this.props.currentUser)
   }
 
+  constructHoursWorkedPerDay(timeEntries){
+    let ret = {}
+    for(let i = 0; i < timeEntries.length; i++){ 
+      let nextTimeEntry = timeEntries[i]
+      let date = nextTimeEntry.date.split('T')[0]
+      if(date in ret){
+        ret[date] += Number(nextTimeEntry.hours)
+      } else {
+        ret[date] = Number(nextTimeEntry.hours)
+      }
+    }
+    return ret
+  }
+
   render() {
     let timeEntries = <></>
+    let dayMap = this.constructHoursWorkedPerDay(this.props.timeEntries)
     if(this.props.timeEntries.length > 0){
       timeEntries = this.props.timeEntries.map(timeEntry => {
+        const entryDay = timeEntry.date.split('T')[0]
+        const rowStyle = Number(this.props.currentUser.preferredworkinghourperday) <= dayMap[entryDay] ? { backgroundColor: 'lightgreen'} : { backgroundColor: 'lightpink'}
         return (
-          <tr key={timeEntry.entry_id}>
+          <tr key={timeEntry.entry_id} style={rowStyle}>
             <th scope="row">{timeEntry.entry_id}</th>
             <td>{timeEntry.username}</td>
             <td>{timeEntry.hours}</td>

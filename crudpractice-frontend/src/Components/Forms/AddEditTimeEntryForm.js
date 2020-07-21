@@ -5,7 +5,7 @@ class AddEditTimeEntryForm extends React.Component {
   state = {
     entry_id: 0,
     username: '',
-    hours: '',
+    hours: 0,
     workedon: '',
   }
 
@@ -33,6 +33,7 @@ class AddEditTimeEntryForm extends React.Component {
           this.props.toggle()
         } else {
           console.log('failure')
+          console.log(timeEntry)
         }
       })
       .catch(err => console.log(err))
@@ -58,6 +59,7 @@ class AddEditTimeEntryForm extends React.Component {
           this.props.toggle()
         } else {
           console.log('failure')
+          console.log(timeEntry)
         }
       })
       .catch(err => console.log(err))
@@ -76,7 +78,7 @@ class AddEditTimeEntryForm extends React.Component {
       <Form onSubmit={this.props.timeEntry ? this.submitFormEditTimeEntry : this.submitFormAddTimeEntry}>
         <FormGroup>
           <Label for="hours">Hours</Label>
-          <Input type="number" name="hours" id="hours" onChange={this.onChange} value={this.state.hours === null ? '' : this.state.hours} />
+          <Input type="number" name="hours" id="hours" onChange={this.onChange} value={this.state.hours ? this.state.hours : 0} />
         </FormGroup>
         <FormGroup>
           <Label for="workedon">What did you work on?</Label>

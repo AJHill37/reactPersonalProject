@@ -1,1 +1,34 @@
-Make it so that validation is real on forms.
+Make it so that validation is real on forms. Hard
+
+Make it so that different users can CRUD with respect to their role (admins can access timeEntries on users). Hard
+
+Make it so that sorting works with respect to date on timeEntries. Medium
+
+Make it so that time entries can have an arbitrary number of notes. Desperate hour we can make this static field
+and claim misunderstood requirements. Medium
+
+Make it so that notes correctly get ported to csv. Hard
+
+Make the login screen not look like ass. Medium
+
+Make it so that different roles can be created via admin. Desperate hour can do this in db but its not great. Easyish
+
+Make it so that the date format doesn't look so bad.
+
+Make it so that users can edit the date of time entries. They should still sort correctly.
+
+Update Edit button to say something like "User Settings"
+
+Nice to have but not strictly needed:
+Should probably remove "ID" from tables where the user doesn't care about that info.
+Make sure everything named "Item" gets updated.
+Make it so that hours uses real numbers instead of this janky Numbers cast work around.
+
+Pipe Dream: 
+Add validation so that you can't work more than 24 hours in day.
+
+Done:
+Make it so that google doesn't yell at you when you log in about how your password has been exposed. Desperate hour can look into just disabling the error message. Medium
+Make it so that users can log out. Easy
+Make it so that red highlighting happens depending on preferred hours. Easy
+
