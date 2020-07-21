@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Container, Row, Col } from 'reactstrap'
-import SignInModalForm from './Components/Modals/SignInModal'
 import SignUpModalForm from './Components/Modals/SignUpModal'
 import AddEditUserModalForm from './Components/Modals/AddEditUserModalForm'
 import AddEditTimeEntryModalForm from './Components/Modals/AddEditTimeEntryModalForm'
