@@ -125,8 +125,12 @@ class App extends Component {
     })
       .then(response => response.json())
       .then(user => {
-        this.updateCurrentUser(user)
-        this.toggle()
+        if(user && !user.dbError){
+          this.updateCurrentUser(user)
+          this.toggle()            
+        } else {
+          this.clearUsers()
+        }
     })
     .catch(err => console.log(err))
   }

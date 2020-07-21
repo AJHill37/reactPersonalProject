@@ -8,21 +8,35 @@ const { query } = require('express');
   // app/models/user.js
   const signup = (req, res, db) => {
     const user = req.body
+    if(!user || !user.password || !user.username || user.preferredworkinghourperday === undefined) {
+      res.json({dbError: 'Bad sign up'})
+      return
+    }
     user.isAdmin = false;
     user.isManager = false;
-    hashPassword(user.password)
-      .then((hashedPassword) => {
-        delete user.password
-        user.password_digest = hashedPassword
+    findUser(user, db)
+      .then(foundUser => {
+        if(!foundUser.username && user && user.password){
+          console.log('HERE AAAA')
+          console.log(foundUser)
+          console.log(user)
+          hashPassword(user.password)
+          .then((hashedPassword) => {
+            delete user.password
+            user.password_digest = hashedPassword
+          })
+          .then(() => createToken())
+          .then(token => user.token = token)
+          .then(() => createUser(user, db))
+          .then(user => {
+            delete user.password_digest
+            res.status(201).json({ user })
+          })
+          .catch((err) => console.error(err))
+        } else {
+          res.json({dbError: 'User exists'})
+        }
       })
-      .then(() => createToken())
-      .then(token => user.token = token)
-      .then(() => createUser(user, db))
-      .then(user => {
-        delete user.password_digest
-        res.status(201).json({ user })
-      })
-      .catch((err) => console.error(err))
   }
 
   // app/models/user.js
@@ -57,20 +71,41 @@ const { query } = require('express');
   const signin = (req, res, db) => {
     const userReq = req.body
     let user
-  
+
+    if(!userReq || !userReq.password || !userReq.username){
+      res.json({dbError: 'Bad sign in'})
+      return      
+    }
+
     findUser(userReq, db)
       .then(foundUser => {
+        if(foundUser.dbError){
+          return foundUser
+        }
         user = foundUser
         return checkPassword(userReq.password, foundUser)
       })
-      .then((res) => createToken())
-      .then(token => {
-        updateUserToken(token, user, db)
-        user.token = token
+      .then((res) => {
+        if(!res.dbError){
+          return createToken()
+        } else {
+          return res
+        }
       })
-      .then(() => {
-        delete user.password_digest
-        res.status(200).json(user)
+      .then(token => {
+        if(!token.dbError){
+          updateUserToken(token, user, db)
+          user.token = token
+        } 
+        return token  
+      })
+      .then(token => {
+        if(!token.dbError){
+          delete user.password_digest
+          res.status(200).json(user)  
+        } else {
+          res.json(token)
+        }
       })
       .catch((err) => console.error(err))
   }
@@ -78,7 +113,13 @@ const { query } = require('express');
     // app/models/user.js
   const findUser = (userReq, db) => {
     return db.raw("SELECT * FROM users WHERE username = ?", [userReq.username])
-      .then((data) => data.rows[0])
+      .then((data) => {
+        if(data && data.rows && data.rows.length > 0){
+          return data.rows[0]
+        } else {
+          return {dbError: 'No User exists'}
+        }
+      })
   }
 
   const checkPassword = (reqPassword, foundUser) => {

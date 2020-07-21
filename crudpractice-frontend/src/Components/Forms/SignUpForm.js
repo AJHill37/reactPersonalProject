@@ -28,9 +28,11 @@ class SignUpForm extends React.Component {
     })
       .then(response => response.json())
       .then(data => {
-        this.props.updateCurrentUser(data.user)
-        this.props.toggle()
-    })
+        if(data && data.user){
+          this.props.updateCurrentUser(data.user)
+          this.props.toggle()  
+        }
+      })
       .catch(err => console.log(err))
   }
 
