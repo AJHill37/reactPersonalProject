@@ -44,7 +44,7 @@ class App extends Component {
   addUserToState = (user) => {
     console.log('Got to add user')
     this.setState(prevState => ({
-      users: prevState.users.length ? [...prevState.users, user] : [user]
+      users: prevState.users.length ? [...prevState.users, user] : [user] 
     }))
   }
 
@@ -166,10 +166,6 @@ class App extends Component {
 
   userScreen() {
     const csvLink = this.gCSV(this.state.items)
-
-    if(this.state.timeEntries.length > 0){
-      this.updateCurrentTimeEntry(this.state.timeEntries[0])
-    }
   /*
     <Row>
     <Col>
