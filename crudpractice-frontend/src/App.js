@@ -78,7 +78,7 @@ class App extends Component {
   }
 
   updateUserState = (user) => {
-    const userIndex = this.state.users.findIndex(data => data.username === user.username)
+    const userIndex = this.state.users.findIndex(data => data.token === user.token)
     const newArray = [
     // destructure all items from beginning to the indexed item
       ...this.state.users.slice(0, userIndex),
