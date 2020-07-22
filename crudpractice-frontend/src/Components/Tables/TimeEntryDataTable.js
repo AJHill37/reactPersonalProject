@@ -47,6 +47,9 @@ class TimeEntryDataTable extends Component {
     let timeEntries = <></>
     const sortCopy = [].concat(this.props.timeEntries)
     sortCopy.sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+    console.log('A')
+    console.log(sortCopy)
+    console.log('B')
     let dayMap = this.constructHoursWorkedPerDay(this.props.timeEntries)
     if(sortCopy.length > 0 && sortCopy[0].date){
       timeEntries = sortCopy.map(timeEntry => {

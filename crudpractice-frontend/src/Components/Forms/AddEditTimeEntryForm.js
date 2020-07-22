@@ -1,5 +1,8 @@
 import React from 'react';
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
 
 class AddEditTimeEntryForm extends React.Component {
   state = {
@@ -7,6 +10,7 @@ class AddEditTimeEntryForm extends React.Component {
     username: '',
     hours: 0,
     workedon: '',
+    date: new Date(),
     note1: '',
     note2: '',
     note3: ''
@@ -15,6 +19,11 @@ class AddEditTimeEntryForm extends React.Component {
   onChange = e => {
     this.setState({[e.target.name]: e.target.value})
   }
+
+  handleDateChange = date => {
+    this.setState({date: date})
+  }
+
 
   submitFormAddTimeEntry = e => {
     e.preventDefault()
@@ -27,6 +36,7 @@ class AddEditTimeEntryForm extends React.Component {
         username: this.props.currentUser.username,
         hours: this.state.hours,
         workedon: this.state.workedon,
+        date: this.state.date,
         note1: this.state.note1,
         note2: this.state.note2,
         note3: this.state.note3
@@ -56,6 +66,7 @@ class AddEditTimeEntryForm extends React.Component {
         entry_id: this.state.entry_id,
         hours: this.state.hours,
         workedon: this.state.workedon,
+        date: this.state.date,
         note1: this.state.note1,
         note2: this.state.note2,
         note3: this.state.note3
@@ -77,8 +88,10 @@ class AddEditTimeEntryForm extends React.Component {
   componentDidMount(){
     // if timeEntry exists, populate the state with proper data
     if(this.props.timeEntry){
+      let date = new Date(this.props.timeEntry.date)
+      date = new Date(date.getTime() + (date.getTimezoneOffset() * 60000));
       const { entry_id, username, hours, workedon, note1, note2, note3 } = this.props.timeEntry
-      this.setState({ entry_id, username, hours, workedon, note1, note2, note3 })
+      this.setState({ entry_id, username, hours, workedon, date, note1, note2, note3 })
     }
   }
 
@@ -92,6 +105,10 @@ class AddEditTimeEntryForm extends React.Component {
         <FormGroup>
           <Label for="workedon">What did you work on?</Label>
           <Input type="text" name="workedon" id="workedon" onChange={this.onChange} value={this.state.workedon === null ? '' : this.state.workedon}  />
+        </FormGroup>
+        <FormGroup>
+          <Label style={{marginRight: '10px'}} for="date">Date</Label>
+          <DatePicker selected={this.state.date} onChange={this.handleDateChange}/>
         </FormGroup>
         <FormGroup>
           <Label for="note1">Note1</Label>

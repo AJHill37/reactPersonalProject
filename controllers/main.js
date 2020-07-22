@@ -240,14 +240,16 @@ const { query } = require('express');
   }
 
   const postTimeEntryHelper = (req, res, db, isAdmin, isManager) => {
+    let date
     const { username, hours, workedon, note1, note2, note3 } = req.body
-    const date = new Date()
-    db('timeentry').insert({ username, hours, workedon, note1, note2, note3, date })
+    date = req.body.date ? new Date(req.body.date) : new Date()
+    date = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+    db('timeentry').insert({ username, hours, workedon, date, note1, note2, note3 })
       .returning('*')
       .then(timeEntry => {
         res.json(timeEntry)
       })
-      .catch(err => res.status(400).json({dbError: 'db error'}))
+      .catch(err => res.status(400).json({dbError: err}))
   }
 
   const putTimeEntry = (req, res, db) => {
@@ -256,8 +258,11 @@ const { query } = require('express');
 
 
   const putTimeEntryHelper = (req, res, db, isAdmin, isManager) => {
+    let date
     const { entry_id, hours, workedon, note1, note2, note3 } = req.body
-    db('timeentry').where({entry_id}).update({hours, workedon, note1, note2, note3})
+    date = req.body.date ? new Date(req.body.date) : new Date()
+    date = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+    db('timeentry').where({entry_id}).update({hours, workedon, date, note1, note2, note3})
       .returning('*')
       .then(item => {
         res.json(item)
